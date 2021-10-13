@@ -9,22 +9,37 @@
 
 namespace zzz
 {
-    struct PipelineConfigInfo{};
+    struct PipelineConfigInfo
+    {
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
+    };
 
-    class zzzPipeline
+    class ZzzPipeline
     {
         public:
-            zzzPipeline
+            ZzzPipeline
             (
-                zzzDevice& device,
+                ZzzDevice& device,
                 const std::string& vertFilepath,
                 const std::string& fragFilepath,
                 const PipelineConfigInfo& configInfo
             );
-            ~zzzPipeline() {};
+            ~ZzzPipeline();
 
-            zzzPipeline(const zzzPipeline&) = delete;
-            void operator=(const zzzPipeline&) = delete;
+            ZzzPipeline(const ZzzPipeline&) = delete;
+            void operator=(const ZzzPipeline&) = delete;
+
+            void bind(VkCommandBuffer commandBuffer);
 
             static PipelineConfigInfo defaultPipelineConfigInfo
             (
@@ -48,8 +63,8 @@ namespace zzz
                 VkShaderModule* shaderModule
             );
 
-            zzzDevice& zzzDevice; // could dangle? part03 7:30
-            VkPipeline graphicsPipeLine;
+            ZzzDevice& zzzDevice; // could dangle? part03 7:30
+            VkPipeline graphicsPipeline;
             VkShaderModule vertShaderModule;
             VkShaderModule fragShaderModule;
     };

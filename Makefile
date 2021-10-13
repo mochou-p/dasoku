@@ -9,9 +9,7 @@ LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -L$(GLFW_PATH)/lib -lglfw3 -lvulkan-1 -lgdi32
 
 CC = g++
 
-.PHONY: all
-
-TARGET %: *.cpp
-	cls
+TARGET: *.cpp
+	compile_shaders.bat
 	$(CC) $(CFLAGS) -o main.exe *.cpp $(LDFLAGS)
 	./main

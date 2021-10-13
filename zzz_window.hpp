@@ -9,16 +9,24 @@
 
 namespace zzz
 {
-    class zzzWindow
+    class ZzzWindow
     {
         public:
-            zzzWindow(int w, int h, std::string name);
-            ~zzzWindow();
+            ZzzWindow(int w, int h, std::string name);
+            ~ZzzWindow();
 
-            zzzWindow(const zzzWindow &) = delete;
-            zzzWindow &operator=(const zzzWindow &) = delete;
+            ZzzWindow(const ZzzWindow &) = delete;
+            ZzzWindow &operator=(const ZzzWindow &) = delete;
 
             bool shouldClose() { return glfwWindowShouldClose(window); }
+            VkExtent2D getExtent()
+            {
+                return
+                {
+                    static_cast<uint32_t>(width),
+                    static_cast<uint32_t>(height)
+                }; 
+            }
 
             void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 

@@ -25,7 +25,7 @@ namespace zzz
         bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
-    class zzzDevice
+    class ZzzDevice
     {
         public:
             #ifdef NDEBUG
@@ -34,13 +34,13 @@ namespace zzz
             const bool enableValidationLayers = true;
             #endif
 
-            zzzDevice(zzzWindow &window);
-            ~zzzDevice();
+            ZzzDevice(ZzzWindow &window);
+            ~ZzzDevice();
 
-            zzzDevice(const zzzDevice &) = delete;
-            void operator=(const zzzDevice &) = delete;
-            zzzDevice(zzzDevice &&) = delete;
-            zzzDevice &operator=(zzzDevice &&) = delete;
+            ZzzDevice(const ZzzDevice &) = delete;
+            void operator=(const ZzzDevice &) = delete;
+            ZzzDevice(ZzzDevice &&) = delete;
+            ZzzDevice &operator=(ZzzDevice &&) = delete;
 
             VkCommandPool getCommandPool() { return commandPool; }
             VkDevice device() { return device_; }
@@ -102,7 +102,7 @@ namespace zzz
             VkInstance instance;
             VkDebugUtilsMessengerEXT debugMessenger;
             VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-            zzzWindow &window;
+            ZzzWindow &window;
             VkCommandPool commandPool;
 
             VkDevice device_;

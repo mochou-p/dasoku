@@ -6,18 +6,18 @@
 
 namespace zzz
 {
-    zzzWindow::zzzWindow(int w, int h, std::string name): width{w}, height{h}, windowName{name}
+    ZzzWindow::ZzzWindow(int w, int h, std::string name): width{w}, height{h}, windowName{name}
     {
         initWindow();
     }
 
-    zzzWindow::~zzzWindow()
+    ZzzWindow::~ZzzWindow()
     {
         glfwDestroyWindow(window);
         glfwTerminate();
     }
 
-    void zzzWindow::initWindow()
+    void ZzzWindow::initWindow()
     {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -26,7 +26,7 @@ namespace zzz
         window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
     }
 
-    void zzzWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
+    void ZzzWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
     {
         if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)
         {
