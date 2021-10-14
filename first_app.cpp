@@ -8,6 +8,7 @@ namespace zzz
 {
     FirstApp::FirstApp()
     {
+        loadModels();
         createPipelineLayout();
         createPipeline();
         createCommandBuffers();
@@ -31,6 +32,18 @@ namespace zzz
         }
 
         vkDeviceWaitIdle(zzzDevice.device());
+    }
+
+    void FirstApp::loadModels()
+    {
+        std::vector<ZzzModel::Vertex> vertices
+        {
+            {{  0.0f, -0.5f }},
+            {{  0.5f,  0.5f }},
+            {{ -0.5f,  0.5f }}
+        };
+
+        zzzModel = std::make_unique<ZzzModel>(zzzDevice, vertices);
     }
 
     void FirstApp::createPipelineLayout()
@@ -137,7 +150,8 @@ namespace zzz
             );
 
             zzzPipeline->bind(commandBuffers[i]);
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            zzzModel->bind(commandBuffers[i]);
+            zzzModel->draw(commandBuffers[i]);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)

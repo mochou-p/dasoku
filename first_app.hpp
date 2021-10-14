@@ -6,6 +6,7 @@
 #include "zzz_window.hpp"
 #include "zzz_device.hpp"
 #include "zzz_swap_chain.hpp"
+#include "zzz_model.hpp"
 
 #include <memory>
 #include <vector>
@@ -27,6 +28,7 @@ namespace zzz
             void run();
 
         private:
+            void loadModels();
             void createPipelineLayout();
             void createPipeline();
             void createCommandBuffers();
@@ -38,15 +40,6 @@ namespace zzz
             std::unique_ptr<ZzzPipeline> zzzPipeline;
             VkPipelineLayout pipelineLayout;
             std::vector<VkCommandBuffer> commandBuffers;
-            // ZzzPipeline zzzPipeline
-            // {
-            //     zzzDevice,
-            //     "./shaders/simple_shader.vert.spv",
-            //     "./shaders/simple_shader.frag.spv",
-            //     ZzzPipeline::defaultPipelineConfigInfo
-            //     (
-            //         WIDTH, HEIGHT
-            //     )
-            // };
+            std::unique_ptr<ZzzModel> zzzModel;
     };
 }

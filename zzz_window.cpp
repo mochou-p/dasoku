@@ -6,7 +6,12 @@
 
 namespace zzz
 {
-    ZzzWindow::ZzzWindow(int w, int h, std::string name): width{w}, height{h}, windowName{name}
+    ZzzWindow::ZzzWindow
+    (
+        int w,
+        int h,
+        std::string name
+    ): width{w}, height{h}, windowName{name}
     {
         initWindow();
     }
