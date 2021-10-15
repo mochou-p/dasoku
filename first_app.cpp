@@ -82,8 +82,8 @@ namespace zzz
         zzzPipeline = std::make_unique<ZzzPipeline>
         (
             zzzDevice,
-            "shaders/color.vert.spv",
-            "shaders/color.frag.spv",
+            "shaders/test.vert.spv",
+            "shaders/test.frag.spv",
             pipelineConfig
         );
     }
@@ -137,7 +137,7 @@ namespace zzz
             renderPassInfo.renderArea.extent = zzzSwapChain.getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f }; // background
+            clearValues[0].color = { 0.051f, 0.066f, 0.09f, 1.0f }; // background
             clearValues[1].depthStencil = { 1.0f, 0 };
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();

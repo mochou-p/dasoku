@@ -2,6 +2,10 @@
 
 #version 450
 
+#ifdef GL_ES
+precision mediump float;
+#endif
+
 layout (location = 0) out vec4 outColor;
 
 void main()
