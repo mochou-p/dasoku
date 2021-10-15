@@ -82,8 +82,8 @@ namespace zzz
         zzzPipeline = std::make_unique<ZzzPipeline>
         (
             zzzDevice,
-            "shaders/simple_shader.vert.spv",
-            "shaders/simple_shader.frag.spv",
+            "shaders/color.vert.spv",
+            "shaders/color.frag.spv",
             pipelineConfig
         );
     }

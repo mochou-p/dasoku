@@ -1,6 +1,6 @@
 :: zzz
 
-set VULKAN_SDK_PATH=C:/VulkanSDK/1.2.189.2
+set VULKAN_SDK_PATH=C:\VulkanSDK\1.2.189.2
+set GLSLC_PATH=%VULKAN_SDK_PATH%\Bin\glslc.exe
 
-%VULKAN_SDK_PATH%/Bin/glslc.exe shaders/simple_shader.vert -o shaders/simple_shader.vert.spv
-%VULKAN_SDK_PATH%/Bin/glslc.exe shaders/simple_shader.frag -o shaders/simple_shader.frag.spv
+for %%f in (shaders\*.*) do %GLSLC_PATH% %%f -o %%f.spv
