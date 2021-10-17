@@ -26,9 +26,11 @@ namespace zzz
     {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
         window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
     void ZzzWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
@@ -37,5 +39,18 @@ namespace zzz
         {
             throw std::runtime_error("failed to create window surface");
         }
+    }
+
+    void ZzzWindow::framebufferResizeCallback
+    (
+        GLFWwindow *window,
+        int width,
+        int height
+    )
+    {
+        auto zzzWindow = reinterpret_cast<ZzzWindow *>(glfwGetWindowUserPointer(window));
+        zzzWindow->framebufferResized = true;
+        zzzWindow->width = width;
+        zzzWindow->height = height;
     }
 }

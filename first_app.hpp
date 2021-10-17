@@ -33,10 +33,12 @@ namespace zzz
             void createPipeline();
             void createCommandBuffers();
             void drawFrame();
+            void recreateSwapChain();
+            void recordCommandBuffer(int imageIndex);
 
             ZzzWindow zzzWindow{ WIDTH, HEIGHT, "zzz" };
             ZzzDevice zzzDevice{ zzzWindow };
-            ZzzSwapChain zzzSwapChain{ zzzDevice, zzzWindow.getExtent() };
+            std::unique_ptr<ZzzSwapChain> zzzSwapChain;
             std::unique_ptr<ZzzPipeline> zzzPipeline;
             VkPipelineLayout pipelineLayout;
             std::vector<VkCommandBuffer> commandBuffers;

@@ -85,13 +85,11 @@ namespace zzz
 
     std::vector<VkVertexInputAttributeDescription> ZzzModel::Vertex::getAttributeDescriptions()
     {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[0].offset = 0;
-
-        return attributeDescriptions;
+        return
+        {
+            // location, binding, format, offset
+            { 0, 0, VK_FORMAT_R32G32_SFLOAT,    offsetof(Vertex, position) },
+            { 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)    }
+        };
     }
-
 }

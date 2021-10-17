@@ -38,7 +38,7 @@ namespace zzz
             ~ZzzDevice();
 
             ZzzDevice(const ZzzDevice &) = delete;
-            void operator=(const ZzzDevice &) = delete;
+            ZzzDevice &operator=(const ZzzDevice &) = delete;
             ZzzDevice(ZzzDevice &&) = delete;
             ZzzDevice &operator=(ZzzDevice &&) = delete;
 

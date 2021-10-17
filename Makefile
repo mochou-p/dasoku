@@ -14,3 +14,4 @@ TARGET: *.cpp
 	$(CC) $(CFLAGS) -o main.exe *.cpp $(LDFLAGS)
 	./main
 	destroy_shaders.bat
+	cls

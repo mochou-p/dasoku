@@ -19,7 +19,7 @@ namespace zzz
             ~ZzzSwapChain();
 
             ZzzSwapChain(const ZzzSwapChain &) = delete;
-            void operator=(const ZzzSwapChain &) = delete;
+            ZzzSwapChain &operator=(const ZzzSwapChain &) = delete;
 
             VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
             VkRenderPass getRenderPass()            { return renderPass;                   }
