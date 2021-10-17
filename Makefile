@@ -9,9 +9,11 @@ LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -L$(GLFW_PATH)/lib -lglfw3 -lvulkan-1 -lgdi32
 
 CC = g++
 
-TARGET: *.cpp
+DESTROY_SHADERS = del shaders\*.spv
+
+TARGET:
 	compile_shaders.bat
 	$(CC) $(CFLAGS) -o main.exe *.cpp $(LDFLAGS)
 	./main
-	destroy_shaders.bat
+	$(DESTROY_SHADERS)
 	cls
