@@ -11,16 +11,13 @@ CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)/include -I$(VULKAN_SDK_PATH
 LDFLAGS = -L$(VULKAN_SDK_PATH)/lib -L$(GLFW_PATH)/lib -lglfw3 -lvulkan-1 -lgdi32
 
 COMPILE_SHADERS = for %%f in ($(SHADERS_PATH)\*.*) do $(GLSLC_PATH) %%f -o %%f.spv
-DESTROY_SHADERS = del $(SHADERS_PATH)\*.spv
+CLEAN = del $(SHADERS_PATH)\*.spv; main.exe
 
 CC = g++
 
 TARGET:
+	$(CLEAN)
 	$(COMPILE_SHADERS)
 	$(CC) $(CFLAGS) -o main.exe *.cpp $(LDFLAGS)
 	./main
 	cls
-
-clean:
-	$(DESTROY_SHADERS)
-	del main.exe
