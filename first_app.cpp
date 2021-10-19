@@ -97,7 +97,22 @@ namespace zzz
         }
 
         vkDeviceWaitIdle(zzzDevice.device());
-        zzzSwapChain = std::make_unique<ZzzSwapChain>(zzzDevice, extent);
+
+        if (zzzSwapChain == nullptr)
+        {
+            zzzSwapChain = std::make_unique<ZzzSwapChain>(zzzDevice, extent);
+        }
+        else
+        {
+            zzzSwapChain = std::make_unique<ZzzSwapChain>(zzzDevice, extent, std::move(zzzSwapChain));
+
+            if (zzzSwapChain->imageCount() != commandBuffers.size())
+            {
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+        }
+        
         createPipeline();
     }
 
@@ -124,6 +139,18 @@ namespace zzz
             throw std::runtime_error("failed to allocate command buffers");
         }
         //
+    }
+
+    void FirstApp::freeCommandBuffers()
+    {
+        vkFreeCommandBuffers
+        (
+            zzzDevice.device(),
+            zzzDevice.getCommandPool(),
+            static_cast<uint32_t>(commandBuffers.size()),
+            commandBuffers.data()
+        );
+        commandBuffers.clear();
     }
 
     void FirstApp::recordCommandBuffer(int imageIndex)

@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace zzz
 {
@@ -16,6 +17,7 @@ namespace zzz
             static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
             ZzzSwapChain(ZzzDevice &deviceRef, VkExtent2D windowExtent);
+            ZzzSwapChain(ZzzDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<ZzzSwapChain> previous);
             ~ZzzSwapChain();
 
             ZzzSwapChain(const ZzzSwapChain &) = delete;
@@ -41,6 +43,7 @@ namespace zzz
             VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
         private:
+            void init();
             void createSwapChain();
             void createImageViews();
             void createDepthResources();
@@ -72,6 +75,8 @@ namespace zzz
             VkExtent2D windowExtent;
 
             VkSwapchainKHR swapChain;
+
+            std::shared_ptr<ZzzSwapChain> oldSwapChain;
 
             std::vector<VkSemaphore> imageAvailableSemaphores;
             std::vector<VkSemaphore> renderFinishedSemaphores;

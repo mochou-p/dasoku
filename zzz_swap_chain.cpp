@@ -18,6 +18,23 @@ namespace zzz
         VkExtent2D extent
     ): device{deviceRef}, windowExtent{extent}
     {
+        init();
+    }
+
+    ZzzSwapChain::ZzzSwapChain
+    (
+        ZzzDevice &deviceRef,
+        VkExtent2D extent,
+        std::shared_ptr<ZzzSwapChain> previous
+    ): device{deviceRef}, windowExtent{extent}, oldSwapChain{previous}
+    {
+        init();
+
+        oldSwapChain = nullptr;
+    }
+
+    void ZzzSwapChain::init()
+    {
         createSwapChain();
         createImageViews();
         createRenderPass();
@@ -203,7 +220,8 @@ namespace zzz
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
+        createInfo.oldSwapchain =
+            oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
         if
         (
