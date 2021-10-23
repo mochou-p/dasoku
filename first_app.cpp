@@ -5,6 +5,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <stdexcept>
 
@@ -12,13 +13,14 @@ namespace zzz
 {
     struct SimplePushConstantData
     {
+        glm::mat2 transform{ 1.0f };
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
 
     FirstApp::FirstApp()
     {
-        loadModels();
+        loadGameObjects();
         createPipelineLayout();
         recreateSwapChain();
         createCommandBuffers();
@@ -44,7 +46,7 @@ namespace zzz
         vkDeviceWaitIdle(zzzDevice.device());
     }
 
-    void FirstApp::loadModels()
+    void FirstApp::loadGameObjects()
     {
         std::vector<ZzzModel::Vertex> vertices
         {
@@ -53,7 +55,16 @@ namespace zzz
             {{ -0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f }}
         };
 
-        zzzModel = std::make_unique<ZzzModel>(zzzDevice, vertices);
+        auto zzzModel = std::make_shared<ZzzModel>(zzzDevice, vertices);
+
+        auto triangle = ZzzGameObject::createGameObject();
+        triangle.model = zzzModel;
+        triangle.color = { 0.8f, 0.3f, 0.0f };
+        triangle.transform2d.translation.x = 0.2f;
+        triangle.transform2d.scale = { 2.0f, 0.5f };
+        triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+
+        gameObjects.push_back(std::move(triangle));
     }
 
     void FirstApp::createPipelineLayout()
@@ -153,7 +164,6 @@ namespace zzz
         {
             throw std::runtime_error("failed to allocate command buffers");
         }
-        //
     }
 
     void FirstApp::freeCommandBuffers()
@@ -170,83 +180,85 @@ namespace zzz
 
     void FirstApp::recordCommandBuffer(int imageIndex)
     {
-        static int frame = 0;
-        frame = (frame + 1) % 100;
         VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-            if
-            (
-                vkBeginCommandBuffer
-                (
-                    commandBuffers[imageIndex],
-                    &beginInfo
-                ) != VK_SUCCESS
-            )
-            {
-                throw std::runtime_error("failed to begin recording command buffer");
-            }
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = zzzSwapChain->getRenderPass();
-            renderPassInfo.framebuffer = zzzSwapChain->getFrameBuffer(imageIndex);
-
-            renderPassInfo.renderArea.offset = { 0, 0 };
-            renderPassInfo.renderArea.extent = zzzSwapChain->getSwapChainExtent();
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f }; // background
-            clearValues[1].depthStencil = { 1.0f, 0 };
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass
+        if
+        (
+            vkBeginCommandBuffer
             (
                 commandBuffers[imageIndex],
-                &renderPassInfo,
-                VK_SUBPASS_CONTENTS_INLINE
+                &beginInfo
+            ) != VK_SUCCESS
+        )
+        {
+            throw std::runtime_error("failed to begin recording command buffer");
+        }
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = zzzSwapChain->getRenderPass();
+        renderPassInfo.framebuffer = zzzSwapChain->getFrameBuffer(imageIndex);
+
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent = zzzSwapChain->getSwapChainExtent();
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f }; // background
+        clearValues[1].depthStencil = { 1.0f, 0 };
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass
+        (
+            commandBuffers[imageIndex],
+            &renderPassInfo,
+            VK_SUBPASS_CONTENTS_INLINE
+        );
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(zzzSwapChain->getSwapChainExtent().width);
+        viewport.height = static_cast<float>(zzzSwapChain->getSwapChainExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        VkRect2D scissor{ {0, 0}, zzzSwapChain->getSwapChainExtent() };
+        vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+        vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
+
+        renderGameObjects(commandBuffers[imageIndex]);
+
+        vkCmdEndRenderPass(commandBuffers[imageIndex]);
+        if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to record command buffer");
+        }
+    }
+
+    void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer)
+    {
+        zzzPipeline->bind(commandBuffer);
+
+        for (auto& obj : gameObjects)
+        {
+            SimplePushConstantData push{};
+            push.offset = obj.transform2d.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2d.mat2();
+
+            vkCmdPushConstants
+            (
+                commandBuffer,
+                pipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push
             );
-
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(zzzSwapChain->getSwapChainExtent().width);
-            viewport.height = static_cast<float>(zzzSwapChain->getSwapChainExtent().height);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            VkRect2D scissor{ {0, 0}, zzzSwapChain->getSwapChainExtent() };
-            vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
-            vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
-
-            zzzPipeline->bind(commandBuffers[imageIndex]);
-            zzzModel->bind(commandBuffers[imageIndex]);
-
-            for (int j = 0; j < 4; j++)
-            {
-                SimplePushConstantData push{};
-                push.offset = { -0.5f + frame * 0.01f, -0.4f + j * 0.25f };
-                push.color = { 1.0f - 0.3f * j, 1.0f - 0.3f * j, 1.0f - 0.3f * j };
-
-                vkCmdPushConstants
-                (
-                    commandBuffers[imageIndex],
-                    pipelineLayout,
-                    VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                    0,
-                    sizeof(SimplePushConstantData),
-                    &push
-                );
-
-                zzzModel->draw(commandBuffers[imageIndex]);
-            }
-
-
-            vkCmdEndRenderPass(commandBuffers[imageIndex]);
-            if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
-            {
-                throw std::runtime_error("failed to record command buffer");
-            }
+            obj.model->bind(commandBuffer);
+            obj.model->draw(commandBuffer);
+        }
     }
 
     void FirstApp::drawFrame()
