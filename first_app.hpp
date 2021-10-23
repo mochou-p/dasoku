@@ -5,9 +5,9 @@
 #include "zzz_pipeline.hpp"
 #include "zzz_window.hpp"
 #include "zzz_device.hpp"
-#include "zzz_swap_chain.hpp"
 #include "zzz_model.hpp"
 #include "zzz_game_object.hpp"
+#include "zzz_renderer.hpp"
 
 #include <memory>
 #include <vector>
@@ -32,19 +32,13 @@ namespace zzz
             void loadGameObjects();
             void createPipelineLayout();
             void createPipeline();
-            void createCommandBuffers();
-            void freeCommandBuffers();
-            void drawFrame();
-            void recreateSwapChain();
-            void recordCommandBuffer(int imageIndex);
             void renderGameObjects(VkCommandBuffer commandBuffer);
 
             ZzzWindow zzzWindow{ WIDTH, HEIGHT, "zzz" };
             ZzzDevice zzzDevice{ zzzWindow };
-            std::unique_ptr<ZzzSwapChain> zzzSwapChain;
+            ZzzRenderer zzzRenderer{ zzzWindow, zzzDevice};
             std::unique_ptr<ZzzPipeline> zzzPipeline;
             VkPipelineLayout pipelineLayout;
-            std::vector<VkCommandBuffer> commandBuffers;
             std::vector<ZzzGameObject> gameObjects;
     };
 }
