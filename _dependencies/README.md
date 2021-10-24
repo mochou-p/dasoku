@@ -9,4 +9,4 @@
 
 Everything **except the Vulkan SDK** is included here
 
-You need to install the **Vulkan SDK** from [**here**](https://vulkan.lunarg.com), if you have not already
+You need to [install the **Vulkan SDK**](https://vulkan.lunarg.com), if you have not already
