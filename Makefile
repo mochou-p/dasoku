@@ -1,9 +1,9 @@
 # dasoku
 
 VULKAN_SDK_PATH = C:\VulkanSDK\1.2.189.2
-GLFW_PATH = .\..\_dependencies\GLFW
-GLM_PATH = .\..\_dependencies\GLM
-GLSLC_PATH = .\_dependencies\GLSLC
+GLFW_PATH = .\..\.dependencies\GLFW
+GLM_PATH = .\..\.dependencies\GLM
+GLSLC_PATH = .\.dependencies\GLSLC
 SHADERS_PATH = .\shaders
 
 CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)\include -I$(VULKAN_SDK_PATH)\include
