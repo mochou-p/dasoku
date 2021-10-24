@@ -1,5 +1,5 @@
 # Dasoku
-A two-part rendering(/game) engine for Windows <sub><sup>that is as useless as **snake legs**</sup></sub>
+A two-part rendering(/game) engine for Windows
 
 ##### Dependencies
 - Vulkan SDK (graphics API)
