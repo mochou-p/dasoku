@@ -10,7 +10,9 @@ A two-part rendering(/game) engine for Windows <sub><sup>that is as useless as *
 
 ##### Build
 `make`/`make shaders` - compile shaders
+
 `make ashi`/`make 3d` - build & run **Ashi**
+
 `make hebi`/`make 2d` - build & run **Hebi**
 
 # 
