@@ -1,14 +1,14 @@
 # Dasoku
 A two-part rendering(/game) engine for Windows
 
-#### Dependencies
+### Dependencies
 - Vulkan SDK (graphics API)
 - GLFW (window library)
 - GLM (math library)
 - GLSLC (shader compiler)
 - C\+\+17, g\+\+
 
-#### Build
+### Build
 `make`/`make shaders` - compile shaders
 
 `make ashi`/`make 3d` - build & run **Ashi**
