@@ -16,7 +16,7 @@ namespace zzz
     class ZzzRenderer
     {
         public:
-            ZzzRenderer(ZzzWindow& zzzWindow, ZzzDevice& zzzDevice);
+            ZzzRenderer(ZzzWindow &zzzWindow, ZzzDevice &zzzDevice);
             ~ZzzRenderer();
 
             ZzzRenderer(const ZzzRenderer &) = delete;
@@ -29,7 +29,12 @@ namespace zzz
             const {
                 assert(isFrameStarted && "cannot get command buffer when frame not in progress");
 
-                return commandBuffers[currentImageIndex];
+                return commandBuffers[currentFrameIndex];
+            }
+
+            int getFrameIndex() const
+            {
+                assert(isFrameStarted && "cannot get frame index when frame not in progress");
             }
 
             VkCommandBuffer beginFrame();
@@ -43,12 +48,13 @@ namespace zzz
             void freeCommandBuffers();
             void recreateSwapChain();
 
-            ZzzWindow& zzzWindow;
-            ZzzDevice& zzzDevice;
+            ZzzWindow &zzzWindow;
+            ZzzDevice &zzzDevice;
             std::unique_ptr<ZzzSwapChain> zzzSwapChain;
             std::vector<VkCommandBuffer> commandBuffers;
 
             uint32_t currentImageIndex;
-            bool isFrameStarted;
+            int currentFrameIndex {0};
+            bool isFrameStarted {false};
     };
 }

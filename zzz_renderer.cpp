@@ -39,21 +39,21 @@ namespace zzz
         }
         else
         {
-            zzzSwapChain = std::make_unique<ZzzSwapChain>(zzzDevice, extent, std::move(zzzSwapChain));
+            std::shared_ptr<ZzzSwapChain> oldSwapChain = std::move(zzzSwapChain);
+            zzzSwapChain = std::make_unique<ZzzSwapChain>(zzzDevice, extent, oldSwapChain);
 
-            if (zzzSwapChain->imageCount() != commandBuffers.size())
+            if (!oldSwapChain->compareSwapFormats(*zzzSwapChain.get()))
             {
-                freeCommandBuffers();
-                createCommandBuffers();
+                throw std::runtime_error("swap chain image (or depth) format has changed");
             }
         }
     }
 
     void ZzzRenderer::createCommandBuffers()
     {
-        commandBuffers.resize(zzzSwapChain->imageCount());
+        commandBuffers.resize(ZzzSwapChain::MAX_FRAMES_IN_FLIGHT);
 
-        VkCommandBufferAllocateInfo allocInfo{};
+        VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandPool = zzzDevice.getCommandPool();
@@ -106,7 +106,7 @@ namespace zzz
 
         auto commandBuffer = getCurrentCommandBuffer();
 
-        VkCommandBufferBeginInfo beginInfo{};
+        VkCommandBufferBeginInfo beginInfo {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
         if
@@ -156,6 +156,7 @@ namespace zzz
         }
 
         isFrameStarted = false;
+        currentFrameIndex = (currentFrameIndex + 1) % ZzzSwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
     void ZzzRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)
@@ -163,7 +164,7 @@ namespace zzz
         assert(isFrameStarted && "can't call beginSwapChainRenderPass if frame is not in progress");
         assert(commandBuffer == getCurrentCommandBuffer() && "can't begin render pass on command buffer from a different frame");
 
-        VkRenderPassBeginInfo renderPassInfo{};
+        VkRenderPassBeginInfo renderPassInfo {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = zzzSwapChain->getRenderPass();
         renderPassInfo.framebuffer = zzzSwapChain->getFrameBuffer(currentImageIndex);
@@ -171,7 +172,7 @@ namespace zzz
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = zzzSwapChain->getSwapChainExtent();
 
-        std::array<VkClearValue, 2> clearValues{};
+        std::array<VkClearValue, 2> clearValues {};
         clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f }; // background
         clearValues[1].depthStencil = { 1.0f, 0 };
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -184,7 +185,7 @@ namespace zzz
             VK_SUBPASS_CONTENTS_INLINE
         );
 
-        VkViewport viewport{};
+        VkViewport viewport {};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
         viewport.width = static_cast<float>(zzzSwapChain->getSwapChainExtent().width);

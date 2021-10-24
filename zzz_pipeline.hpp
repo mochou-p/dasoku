@@ -33,37 +33,39 @@ namespace zzz
         public:
             ZzzPipeline
             (
-                ZzzDevice& device,
-                const std::string& vertFilepath,
-                const std::string& fragFilepath,
-                const PipelineConfigInfo& configInfo
+                ZzzDevice &device,
+                const std::string &vertFilepath,
+                const std::string &fragFilepath,
+                const PipelineConfigInfo &configInfo
             );
             ~ZzzPipeline();
 
             ZzzPipeline(const ZzzPipeline &) = delete;
             ZzzPipeline &operator=(const ZzzPipeline &) = delete;
 
+            ZzzPipeline() = default; // ??? p10
+
             void bind(VkCommandBuffer commandBuffer);
 
             static void defaultPipelineConfigInfo(PipelineConfigInfo &configInfo);
 
         private:
-            static std::vector<char> readFile(const std::string& filepath);
+            static std::vector<char> readFile(const std::string &filepath);
 
             void createGraphicsPipeline
             (
-                const std::string& vertFilepath,
-                const std::string& fragFilepath,
-                const PipelineConfigInfo& configInfo
+                const std::string &vertFilepath,
+                const std::string &fragFilepath,
+                const PipelineConfigInfo &configInfo
             );
 
             void createShaderModule
             (
-                const std::vector<char>& code,
-                VkShaderModule* shaderModule
+                const std::vector<char> &code,
+                VkShaderModule *shaderModule
             );
 
-            ZzzDevice& zzzDevice; // could dangle? part03 7:30
+            ZzzDevice &zzzDevice;
             VkPipeline graphicsPipeline;
             VkShaderModule vertShaderModule;
             VkShaderModule fragShaderModule;

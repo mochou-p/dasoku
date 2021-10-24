@@ -79,15 +79,16 @@ namespace zzz
         bindingDescriptions[0].stride = sizeof(Vertex);
         bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
+        // alternative to line 89
         return bindingDescriptions;
-        // could just return values of lines 78-80 in {}
     }
 
     std::vector<VkVertexInputAttributeDescription> ZzzModel::Vertex::getAttributeDescriptions()
     {
+        // alternative to line 83
         return
         {
-            // location, binding, format, offset
+            // LOCATION, BINDING, FORMAT, OFFSET
             { 0, 0, VK_FORMAT_R32G32_SFLOAT,    offsetof(Vertex, position) },
             { 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)    }
         };

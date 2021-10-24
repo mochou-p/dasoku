@@ -40,7 +40,7 @@ namespace zzz
         private:
             void createVertexBuffers(const std::vector<Vertex> &vertices);
 
-            ZzzDevice& zzzDevice;
+            ZzzDevice &zzzDevice;
             VkBuffer vertexBuffer;
             VkDeviceMemory vertexBufferMemory;
             uint32_t vertexCount;

@@ -42,9 +42,9 @@ namespace zzz
 
             id_t getId() { return id; }
 
-            std::shared_ptr<ZzzModel> model{};
-            glm::vec3 color{};
-            Transform2dComponent transform2d{};
+            std::shared_ptr<ZzzModel> model {};
+            glm::vec3 color {};
+            Transform2dComponent transform2d {};
 
         private:
             ZzzGameObject(id_t objId): id{objId} {}

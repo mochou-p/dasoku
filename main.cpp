@@ -1,6 +1,6 @@
 // zzz
 
-#include "first_app.hpp"
+#include "simple_app.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -8,7 +8,7 @@
 
 int main()
 {
-    zzz::FirstApp app{};
+    zzz::SimpleApp app {};
 
     try
     {

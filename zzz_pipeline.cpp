@@ -13,10 +13,10 @@ namespace zzz
 {
     ZzzPipeline::ZzzPipeline
     (
-        ZzzDevice& device,
-        const std::string& vertFilepath,
-        const std::string& fragFilepath,
-        const PipelineConfigInfo& configInfo
+        ZzzDevice &device,
+        const std::string &vertFilepath,
+        const std::string &fragFilepath,
+        const PipelineConfigInfo &configInfo
     ): zzzDevice{device}
     {
         createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
@@ -29,7 +29,7 @@ namespace zzz
         vkDestroyPipeline(zzzDevice.device(), graphicsPipeline, nullptr);
     }
 
-    std::vector<char> ZzzPipeline::readFile(const std::string& filepath)
+    std::vector<char> ZzzPipeline::readFile(const std::string &filepath)
     {
         std::ifstream file { filepath, std::ios::ate | std::ios::binary };
 
@@ -50,9 +50,9 @@ namespace zzz
 
     void ZzzPipeline::createGraphicsPipeline
     (
-        const std::string& vertFilepath,
-        const std::string& fragFilepath,
-        const PipelineConfigInfo& configInfo
+        const std::string &vertFilepath,
+        const std::string &fragFilepath,
+        const PipelineConfigInfo &configInfo
     )
     {
         assert
@@ -86,14 +86,14 @@ namespace zzz
         auto bindingDescriptions = ZzzModel::Vertex::getBindingDescriptions();
         auto attributeDesctiptions = ZzzModel::Vertex::getAttributeDescriptions();
 
-        VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDesctiptions.size());
         vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributeDesctiptions.data();
         vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
-        VkGraphicsPipelineCreateInfo pipelineInfo{};
+        VkGraphicsPipelineCreateInfo pipelineInfo {};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
         pipelineInfo.pStages = shaderStages;
@@ -132,14 +132,14 @@ namespace zzz
 
     void ZzzPipeline::createShaderModule
     (
-        const std::vector<char>& code,
-        VkShaderModule* shaderModule
+        const std::vector<char> &code,
+        VkShaderModule *shaderModule
     )
     {
-        VkShaderModuleCreateInfo createInfo{};
+        VkShaderModuleCreateInfo createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
 
         if
         (
@@ -229,7 +229,7 @@ namespace zzz
         configInfo.depthStencilInfo.front = {};  // optional
         configInfo.depthStencilInfo.back = {};   // optional
 
-        configInfo.dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
+        configInfo.dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
         configInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
         configInfo.dynamicStateInfo.dynamicStateCount = 
