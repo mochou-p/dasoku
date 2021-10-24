@@ -1,6 +1,6 @@
-// zzz
+// ashi
 
-#include "simple_app.hpp"
+#include "app.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -8,7 +8,7 @@
 
 int main()
 {
-    zzz::SimpleApp app {};
+    ashi::App app {};
 
     try
     {

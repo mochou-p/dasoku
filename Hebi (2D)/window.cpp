@@ -1,12 +1,12 @@
-// zzz
+// hebi
 
-#include "zzz_window.hpp"
+#include "window.hpp"
 
 #include <stdexcept>
 
-namespace zzz
+namespace hebi
 {
-    ZzzWindow::ZzzWindow
+    HebiWindow::HebiWindow
     (
         int w,
         int h,
@@ -16,13 +16,13 @@ namespace zzz
         initWindow();
     }
 
-    ZzzWindow::~ZzzWindow()
+    HebiWindow::~HebiWindow()
     {
         glfwDestroyWindow(window);
         glfwTerminate();
     }
 
-    void ZzzWindow::initWindow()
+    void HebiWindow::initWindow()
     {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -33,7 +33,7 @@ namespace zzz
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     }
 
-    void ZzzWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
+    void HebiWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR *surface)
     {
         if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)
         {
@@ -41,16 +41,16 @@ namespace zzz
         }
     }
 
-    void ZzzWindow::framebufferResizeCallback
+    void HebiWindow::framebufferResizeCallback
     (
         GLFWwindow *window,
         int width,
         int height
     )
     {
-        auto zzzWindow = reinterpret_cast<ZzzWindow *>(glfwGetWindowUserPointer(window));
-        zzzWindow->framebufferResized = true;
-        zzzWindow->width = width;
-        zzzWindow->height = height;
+        auto hebiWindow = reinterpret_cast<HebiWindow *>(glfwGetWindowUserPointer(window));
+        hebiWindow->framebufferResized = true;
+        hebiWindow->width = width;
+        hebiWindow->height = height;
     }
 }

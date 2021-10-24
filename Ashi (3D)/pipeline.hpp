@@ -1,13 +1,13 @@
-// zzz
+// ashi
 
 #pragma once
 
-#include "zzz_device.hpp"
+#include "device.hpp"
 
 #include <string>
 #include <vector>
 
-namespace zzz
+namespace ashi
 {
     struct PipelineConfigInfo
     {
@@ -28,22 +28,22 @@ namespace zzz
         uint32_t subpass = 0;
     };
 
-    class ZzzPipeline
+    class AshiPipeline
     {
         public:
-            ZzzPipeline
+            AshiPipeline
             (
-                ZzzDevice &device,
+                AshiDevice &device,
                 const std::string &vertFilepath,
                 const std::string &fragFilepath,
                 const PipelineConfigInfo &configInfo
             );
-            ~ZzzPipeline();
+            ~AshiPipeline();
 
-            ZzzPipeline(const ZzzPipeline &) = delete;
-            ZzzPipeline &operator=(const ZzzPipeline &) = delete;
+            AshiPipeline(const AshiPipeline &) = delete;
+            AshiPipeline &operator=(const AshiPipeline &) = delete;
 
-            ZzzPipeline() = default; // ??? p10
+            AshiPipeline() = default; // ??? p10
 
             void bind(VkCommandBuffer commandBuffer);
 
@@ -65,7 +65,7 @@ namespace zzz
                 VkShaderModule *shaderModule
             );
 
-            ZzzDevice &zzzDevice;
+            AshiDevice &ashiDevice;
             VkPipeline graphicsPipeline;
             VkShaderModule vertShaderModule;
             VkShaderModule fragShaderModule;

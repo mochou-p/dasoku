@@ -1,4 +1,4 @@
-// zzz
+// ashi
 
 #pragma once
 
@@ -7,16 +7,16 @@
 
 #include <string>
 
-namespace zzz
+namespace ashi
 {
-    class ZzzWindow
+    class AshiWindow
     {
         public:
-            ZzzWindow(int w, int h, std::string name);
-            ~ZzzWindow();
+            AshiWindow(int w, int h, std::string name);
+            ~AshiWindow();
 
-            ZzzWindow(const ZzzWindow &) = delete;
-            ZzzWindow &operator=(const ZzzWindow &) = delete;
+            AshiWindow(const AshiWindow &) = delete;
+            AshiWindow &operator=(const AshiWindow &) = delete;
 
             bool shouldClose() { return glfwWindowShouldClose(window); }
 

@@ -1,6 +1,6 @@
-// zzz
+// hebi
 
-#include "simple_render_system.hpp"
+#include "render_system.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -9,41 +9,41 @@
 
 #include <stdexcept>
 
-namespace zzz 
+namespace hebi 
 {
-    struct SimplePushConstantData
+    struct HebiPushConstantData
     {
         glm::mat2 transform { 1.0f };
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
 
-    SimpleRenderSystem::SimpleRenderSystem
+    HebiRenderSystem::HebiRenderSystem
     (
-        ZzzDevice &device,
+        HebiDevice &device,
         VkRenderPass renderPass
-    ): zzzDevice{device}
+    ): hebiDevice{device}
     {
         createPipelineLayout();
         createPipeline(renderPass);
     }
 
-    SimpleRenderSystem::~SimpleRenderSystem()
+    HebiRenderSystem::~HebiRenderSystem()
     {
         vkDestroyPipelineLayout
         (
-            zzzDevice.device(),
+            hebiDevice.device(),
             pipelineLayout,
             nullptr
         );
     }
 
-    void SimpleRenderSystem::createPipelineLayout()
+    void HebiRenderSystem::createPipelineLayout()
     {
         VkPushConstantRange pushConstantRange {};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
-        pushConstantRange.size = sizeof(SimplePushConstantData);
+        pushConstantRange.size = sizeof(HebiPushConstantData);
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -56,7 +56,7 @@ namespace zzz
         (
             vkCreatePipelineLayout
             (
-                zzzDevice.device(),
+                hebiDevice.device(),
                 &pipelineLayoutInfo,
                 nullptr,
                 &pipelineLayout
@@ -67,29 +67,29 @@ namespace zzz
         }
     }
 
-    void SimpleRenderSystem::createPipeline(VkRenderPass renderPass)
+    void HebiRenderSystem::createPipeline(VkRenderPass renderPass)
     {
         PipelineConfigInfo pipelineConfig {};
-        ZzzPipeline::defaultPipelineConfigInfo(pipelineConfig);
+        HebiPipeline::defaultPipelineConfigInfo(pipelineConfig);
 
         pipelineConfig.renderPass = renderPass;
         pipelineConfig.pipelineLayout = pipelineLayout;
-        zzzPipeline = std::make_unique<ZzzPipeline>
+        hebiPipeline = std::make_unique<HebiPipeline>
         (
-            zzzDevice,
-            "shaders/simple_shader.vert.spv",
-            "shaders/simple_shader.frag.spv",
+            hebiDevice,
+            "../shaders/simple_shader.vert.spv",
+            "../shaders/simple_shader.frag.spv",
             pipelineConfig
         );
     }
 
-    void SimpleRenderSystem::renderGameObjects
+    void HebiRenderSystem::renderGameObjects
     (
         VkCommandBuffer commandBuffer,
-        std::vector<ZzzGameObject> &gameObjects
+        std::vector<HebiGameObject> &gameObjects
     )
     {
-        zzzPipeline->bind(commandBuffer);
+        hebiPipeline->bind(commandBuffer);
 
         for (auto &obj : gameObjects)
         {
@@ -100,7 +100,7 @@ namespace zzz
                 glm::two_pi<float>()
             );
 
-            SimplePushConstantData push {};
+            HebiPushConstantData push {};
             push.offset = obj.transform2d.translation;
             push.color = obj.color;
             push.transform = obj.transform2d.mat2();
@@ -111,7 +111,7 @@ namespace zzz
                 pipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
-                sizeof(SimplePushConstantData),
+                sizeof(HebiPushConstantData),
                 &push
             );
             obj.model->bind(commandBuffer);

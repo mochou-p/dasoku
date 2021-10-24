@@ -1,6 +1,6 @@
-// zzz
+// hebi
 
-#include "zzz_swap_chain.hpp"
+#include "swap_chain.hpp"
 
 #include <array>
 #include <cstdlib>
@@ -10,22 +10,22 @@
 #include <set>
 #include <stdexcept>
 
-namespace zzz
+namespace hebi
 {
-    ZzzSwapChain::ZzzSwapChain
+    HebiSwapChain::HebiSwapChain
     (
-        ZzzDevice &deviceRef,
+        HebiDevice &deviceRef,
         VkExtent2D extent
     ): device{deviceRef}, windowExtent{extent}
     {
         init();
     }
 
-    ZzzSwapChain::ZzzSwapChain
+    HebiSwapChain::HebiSwapChain
     (
-        ZzzDevice &deviceRef,
+        HebiDevice &deviceRef,
         VkExtent2D extent,
-        std::shared_ptr<ZzzSwapChain> previous
+        std::shared_ptr<HebiSwapChain> previous
     ): device{deviceRef}, windowExtent{extent}, oldSwapChain{previous}
     {
         init();
@@ -33,7 +33,7 @@ namespace zzz
         oldSwapChain = nullptr;
     }
 
-    void ZzzSwapChain::init()
+    void HebiSwapChain::init()
     {
         createSwapChain();
         createImageViews();
@@ -43,7 +43,7 @@ namespace zzz
         createSyncObjects();
     }
 
-    ZzzSwapChain::~ZzzSwapChain()
+    HebiSwapChain::~HebiSwapChain()
     {
         for (auto imageView : swapChainImageViews)
         {
@@ -80,7 +80,7 @@ namespace zzz
         }
     }
 
-    VkResult ZzzSwapChain::acquireNextImage(uint32_t *imageIndex)
+    VkResult HebiSwapChain::acquireNextImage(uint32_t *imageIndex)
     {
         vkWaitForFences
         (
@@ -104,7 +104,7 @@ namespace zzz
         return result;
     }
 
-    VkResult ZzzSwapChain::submitCommandBuffers
+    VkResult HebiSwapChain::submitCommandBuffers
     (
         const VkCommandBuffer *buffers,
         uint32_t *imageIndex
@@ -168,7 +168,7 @@ namespace zzz
         return result;
     }
 
-    void ZzzSwapChain::createSwapChain()
+    void HebiSwapChain::createSwapChain()
     {
         SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
@@ -245,7 +245,7 @@ namespace zzz
         swapChainExtent = extent;
     }
 
-    void ZzzSwapChain::createImageViews()
+    void HebiSwapChain::createImageViews()
     {
         swapChainImageViews.resize(swapChainImages.size());
     
@@ -278,7 +278,7 @@ namespace zzz
         }
     }
 
-    void ZzzSwapChain::createRenderPass()
+    void HebiSwapChain::createRenderPass()
     {
         VkAttachmentDescription depthAttachment {};
         depthAttachment.format = findDepthFormat();
@@ -350,7 +350,7 @@ namespace zzz
         }
     }
 
-    void ZzzSwapChain::createFramebuffers() {
+    void HebiSwapChain::createFramebuffers() {
         swapChainFramebuffers.resize(imageCount());
 
         for (size_t i = 0; i < imageCount(); i++)
@@ -383,7 +383,7 @@ namespace zzz
         }
     }
 
-    void ZzzSwapChain::createDepthResources()
+    void HebiSwapChain::createDepthResources()
     {
         VkFormat depthFormat = findDepthFormat();
         swapChainDepthFormat = depthFormat;
@@ -446,7 +446,7 @@ namespace zzz
         }
     }
 
-    void ZzzSwapChain::createSyncObjects()
+    void HebiSwapChain::createSyncObjects()
     {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -492,7 +492,7 @@ namespace zzz
         }
     }
 
-    VkSurfaceFormatKHR ZzzSwapChain::chooseSwapSurfaceFormat
+    VkSurfaceFormatKHR HebiSwapChain::chooseSwapSurfaceFormat
     (
         const std::vector<VkSurfaceFormatKHR> &availableFormats
     )
@@ -512,7 +512,7 @@ namespace zzz
         return availableFormats[0];
     }
 
-    VkPresentModeKHR ZzzSwapChain::chooseSwapPresentMode
+    VkPresentModeKHR HebiSwapChain::chooseSwapPresentMode
     (
         const std::vector<VkPresentModeKHR> &availablePresentModes
     )
@@ -539,7 +539,7 @@ namespace zzz
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D ZzzSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
+    VkExtent2D HebiSwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities)
     {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
         {
@@ -563,7 +563,7 @@ namespace zzz
         }
     }
 
-    VkFormat ZzzSwapChain::findDepthFormat()
+    VkFormat HebiSwapChain::findDepthFormat()
     {
         return device.findSupportedFormat
         (

@@ -1,8 +1,8 @@
-// zzz
+// hebi
 
 #pragma once
 
-#include "zzz_device.hpp"
+#include "device.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -10,9 +10,9 @@
 
 #include <vector>
 
-namespace zzz
+namespace hebi
 {
-    class ZzzModel
+    class HebiModel
     {
         public:
             struct Vertex
@@ -24,15 +24,15 @@ namespace zzz
                 static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
             };
 
-            ZzzModel
+            HebiModel
             (
-                ZzzDevice &device,
+                HebiDevice &device,
                 const std::vector<Vertex> &vertices
             );
-            ~ZzzModel();
+            ~HebiModel();
 
-            ZzzModel(const ZzzModel &) = delete;
-            ZzzModel &operator=(const ZzzModel &) = delete;
+            HebiModel(const HebiModel &) = delete;
+            HebiModel &operator=(const HebiModel &) = delete;
 
             void bind(VkCommandBuffer commandBuffer);
             void draw(VkCommandBuffer commandBuffer);
@@ -40,7 +40,7 @@ namespace zzz
         private:
             void createVertexBuffers(const std::vector<Vertex> &vertices);
 
-            ZzzDevice &zzzDevice;
+            HebiDevice &hebiDevice;
             VkBuffer vertexBuffer;
             VkDeviceMemory vertexBufferMemory;
             uint32_t vertexCount;

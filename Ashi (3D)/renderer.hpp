@@ -1,28 +1,28 @@
-// zzz
+// ashi
 
 #pragma once
 
-#include "zzz_window.hpp"
-#include "zzz_device.hpp"
-#include "zzz_swap_chain.hpp"
-#include "zzz_model.hpp"
+#include "window.hpp"
+#include "device.hpp"
+#include "swap_chain.hpp"
+#include "model.hpp"
 
 #include <memory>
 #include <vector>
 #include <cassert>
 
-namespace zzz
+namespace ashi
 {
-    class ZzzRenderer
+    class AshiRenderer
     {
         public:
-            ZzzRenderer(ZzzWindow &zzzWindow, ZzzDevice &zzzDevice);
-            ~ZzzRenderer();
+            AshiRenderer(AshiWindow &ashiWindow, AshiDevice &ashiDevice);
+            ~AshiRenderer();
 
-            ZzzRenderer(const ZzzRenderer &) = delete;
-            ZzzRenderer &operator=(const ZzzRenderer &) = delete;
+            AshiRenderer(const AshiRenderer &) = delete;
+            AshiRenderer &operator=(const AshiRenderer &) = delete;
 
-            VkRenderPass getSwapChainRenderPass() const { return zzzSwapChain->getRenderPass(); }
+            VkRenderPass getSwapChainRenderPass() const { return ashiSwapChain->getRenderPass(); }
             bool isFrameInProgres() const { return isFrameStarted; }
 
             VkCommandBuffer getCurrentCommandBuffer()
@@ -48,9 +48,9 @@ namespace zzz
             void freeCommandBuffers();
             void recreateSwapChain();
 
-            ZzzWindow &zzzWindow;
-            ZzzDevice &zzzDevice;
-            std::unique_ptr<ZzzSwapChain> zzzSwapChain;
+            AshiWindow &ashiWindow;
+            AshiDevice &ashiDevice;
+            std::unique_ptr<AshiSwapChain> ashiSwapChain;
             std::vector<VkCommandBuffer> commandBuffers;
 
             uint32_t currentImageIndex;

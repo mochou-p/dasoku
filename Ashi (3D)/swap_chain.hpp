@@ -1,8 +1,8 @@
-// zzz
+// ashi
 
 #pragma once
 
-#include "zzz_device.hpp"
+#include "device.hpp"
 
 #include <vulkan/vulkan.h>
 
@@ -10,18 +10,19 @@
 #include <vector>
 #include <memory>
 
-namespace zzz
+namespace ashi
 {
-    class ZzzSwapChain {
+    class AshiSwapChain
+    {
         public:
             static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-            ZzzSwapChain(ZzzDevice &deviceRef, VkExtent2D windowExtent);
-            ZzzSwapChain(ZzzDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<ZzzSwapChain> previous);
-            ~ZzzSwapChain();
+            AshiSwapChain(AshiDevice &deviceRef, VkExtent2D windowExtent);
+            AshiSwapChain(AshiDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<AshiSwapChain> previous);
+            ~AshiSwapChain();
 
-            ZzzSwapChain(const ZzzSwapChain &) = delete;
-            ZzzSwapChain &operator=(const ZzzSwapChain &) = delete;
+            AshiSwapChain(const AshiSwapChain &) = delete;
+            AshiSwapChain &operator=(const AshiSwapChain &) = delete;
 
             VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
             VkRenderPass getRenderPass()            { return renderPass;                   }
@@ -42,7 +43,7 @@ namespace zzz
             VkResult acquireNextImage(uint32_t *imageIndex);
             VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
-            bool compareSwapFormats(const ZzzSwapChain &swapChain) const
+            bool compareSwapFormats(const AshiSwapChain &swapChain) const
             {
                 return swapChain.swapChainDepthFormat == swapChainDepthFormat &&
                        swapChain.swapChainImageFormat == swapChainImageFormat;
@@ -78,12 +79,12 @@ namespace zzz
             std::vector<VkImage> swapChainImages;
             std::vector<VkImageView> swapChainImageViews;
 
-            ZzzDevice &device;
+            AshiDevice &device;
             VkExtent2D windowExtent;
 
             VkSwapchainKHR swapChain;
 
-            std::shared_ptr<ZzzSwapChain> oldSwapChain;
+            std::shared_ptr<AshiSwapChain> oldSwapChain;
 
             std::vector<VkSemaphore> imageAvailableSemaphores;
             std::vector<VkSemaphore> renderFinishedSemaphores;

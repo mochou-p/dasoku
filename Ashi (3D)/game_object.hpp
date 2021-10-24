@@ -1,14 +1,14 @@
-// zzz
+// ashi
 
 #pragma once
 
-#include "zzz_model.hpp"
+#include "model.hpp"
 
 #include <memory>
 
-namespace zzz
+namespace ashi
 {
-    class ZzzGameObject
+    class AshiGameObject
     {
         struct Transform2dComponent
         {
@@ -29,25 +29,25 @@ namespace zzz
         public:
             using id_t = unsigned int;
 
-            static ZzzGameObject createGameObject()
+            static AshiGameObject createGameObject()
             {
                 static id_t currentId = 0;
-                return ZzzGameObject { currentId++ };
+                return AshiGameObject { currentId++ };
             }
 
-            ZzzGameObject(const ZzzGameObject &) = delete;
-            ZzzGameObject &operator=(const ZzzGameObject &) = delete;
-            ZzzGameObject(ZzzGameObject &&) = default;
-            ZzzGameObject &operator=(ZzzGameObject &&) = default;
+            AshiGameObject(const AshiGameObject &) = delete;
+            AshiGameObject &operator=(const AshiGameObject &) = delete;
+            AshiGameObject(AshiGameObject &&) = default;
+            AshiGameObject &operator=(AshiGameObject &&) = default;
 
             id_t getId() { return id; }
 
-            std::shared_ptr<ZzzModel> model {};
+            std::shared_ptr<AshiModel> model {};
             glm::vec3 color {};
             Transform2dComponent transform2d {};
 
         private:
-            ZzzGameObject(id_t objId): id{objId} {}
+            AshiGameObject(id_t objId): id{objId} {}
 
             id_t id;
     };

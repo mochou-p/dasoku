@@ -1,13 +1,13 @@
-// zzz
+// hebi
 
 #pragma once
 
-#include "zzz_window.hpp"
+#include "window.hpp"
 
 #include <string>
 #include <vector>
 
-namespace zzz
+namespace hebi
 {
     struct SwapChainSupportDetails
     {
@@ -25,7 +25,7 @@ namespace zzz
         bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
-    class ZzzDevice
+    class HebiDevice
     {
         public:
             #ifdef NDEBUG
@@ -34,13 +34,13 @@ namespace zzz
             const bool enableValidationLayers = true;
             #endif
 
-            ZzzDevice(ZzzWindow &window);
-            ~ZzzDevice();
+            HebiDevice(HebiWindow &window);
+            ~HebiDevice();
 
-            ZzzDevice(const ZzzDevice &) = delete;
-            ZzzDevice &operator=(const ZzzDevice &) = delete;
-            ZzzDevice(ZzzDevice &&) = delete;
-            ZzzDevice &operator=(ZzzDevice &&) = delete;
+            HebiDevice(const HebiDevice &) = delete;
+            HebiDevice &operator=(const HebiDevice &) = delete;
+            HebiDevice(HebiDevice &&) = delete;
+            HebiDevice &operator=(HebiDevice &&) = delete;
 
             VkCommandPool getCommandPool() { return commandPool; }
             VkDevice device() { return device_; }
@@ -102,7 +102,7 @@ namespace zzz
             VkInstance instance;
             VkDebugUtilsMessengerEXT debugMessenger;
             VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-            ZzzWindow &window;
+            HebiWindow &window;
             VkCommandPool commandPool;
 
             VkDevice device_;

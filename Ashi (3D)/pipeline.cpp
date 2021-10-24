@@ -1,35 +1,34 @@
-// zzz
+// ashi
 
-#include "zzz_pipeline.hpp"
-
-#include "zzz_model.hpp"
+#include "pipeline.hpp"
+#include "model.hpp"
 
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
 #include <cassert>
 
-namespace zzz
+namespace ashi
 {
-    ZzzPipeline::ZzzPipeline
+    AshiPipeline::AshiPipeline
     (
-        ZzzDevice &device,
+        AshiDevice &device,
         const std::string &vertFilepath,
         const std::string &fragFilepath,
         const PipelineConfigInfo &configInfo
-    ): zzzDevice{device}
+    ): ashiDevice{device}
     {
         createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
     }
 
-    ZzzPipeline::~ZzzPipeline()
+    AshiPipeline::~AshiPipeline()
     {
-        vkDestroyShaderModule(zzzDevice.device(), vertShaderModule, nullptr);
-        vkDestroyShaderModule(zzzDevice.device(), fragShaderModule, nullptr);
-        vkDestroyPipeline(zzzDevice.device(), graphicsPipeline, nullptr);
+        vkDestroyShaderModule(ashiDevice.device(), vertShaderModule, nullptr);
+        vkDestroyShaderModule(ashiDevice.device(), fragShaderModule, nullptr);
+        vkDestroyPipeline(ashiDevice.device(), graphicsPipeline, nullptr);
     }
 
-    std::vector<char> ZzzPipeline::readFile(const std::string &filepath)
+    std::vector<char> AshiPipeline::readFile(const std::string &filepath)
     {
         std::ifstream file { filepath, std::ios::ate | std::ios::binary };
 
@@ -48,7 +47,7 @@ namespace zzz
         return buffer;
     }
 
-    void ZzzPipeline::createGraphicsPipeline
+    void AshiPipeline::createGraphicsPipeline
     (
         const std::string &vertFilepath,
         const std::string &fragFilepath,
@@ -83,8 +82,8 @@ namespace zzz
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        auto bindingDescriptions = ZzzModel::Vertex::getBindingDescriptions();
-        auto attributeDesctiptions = ZzzModel::Vertex::getAttributeDescriptions();
+        auto bindingDescriptions = AshiModel::Vertex::getBindingDescriptions();
+        auto attributeDesctiptions = AshiModel::Vertex::getAttributeDescriptions();
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -117,7 +116,7 @@ namespace zzz
         (
             vkCreateGraphicsPipelines
             (
-                zzzDevice.device(),
+                ashiDevice.device(),
                 VK_NULL_HANDLE,
                 1,
                 &pipelineInfo,
@@ -130,7 +129,7 @@ namespace zzz
         }
     }
 
-    void ZzzPipeline::createShaderModule
+    void AshiPipeline::createShaderModule
     (
         const std::vector<char> &code,
         VkShaderModule *shaderModule
@@ -145,7 +144,7 @@ namespace zzz
         (
             vkCreateShaderModule
             (
-                zzzDevice.device(),
+                ashiDevice.device(),
                 &createInfo, nullptr,
                 shaderModule
             ) != VK_SUCCESS
@@ -155,7 +154,7 @@ namespace zzz
         }
     }
 
-    void ZzzPipeline::bind(VkCommandBuffer commandBuffer)
+    void AshiPipeline::bind(VkCommandBuffer commandBuffer)
     {
         vkCmdBindPipeline
         (
@@ -165,7 +164,7 @@ namespace zzz
         );
     }
 
-    void ZzzPipeline::defaultPipelineConfigInfo(PipelineConfigInfo &configInfo)
+    void AshiPipeline::defaultPipelineConfigInfo(PipelineConfigInfo &configInfo)
     {
         configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

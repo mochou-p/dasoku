@@ -1,5 +1,24 @@
-# zzz-vulkan-engine
+# Dasoku
+A two-part rendering(/game) engine for Windows <sub><sup>that is as useless as **snake legs**</sup></sub>
 
-![zzz-vulkan-engine](https://i.imgur.com/LszJviK.png "current state of the engine")
+##### Dependencies
+- Vulkan SDK (graphics API)
+- GLFW (window library)
+- GLM (math library)
+- GLSLC (shader compiler)
+- C\+\+17, g\+\+
 
-<sub><sup>12/23</sup></sub>
+##### Build
+`make`/`make shaders` - compile shaders
+`make ashi`/`make 3d` - build & run **Ashi**
+`make hebi`/`make 2d` - build & run **Hebi**
+
+# 
+
+### \[WIP\] Ashi (3D)
+> legs
+![ashi](https://i.imgur.com/hFgdzDr.png "Ashi 3D")
+
+### Hebi (2D)
+> snake
+![hebi](https://i.imgur.com/TqOmi6L.png "Hebi 2D")
