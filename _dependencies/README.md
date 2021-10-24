@@ -3,7 +3,7 @@
 - GLFW (window library)
 - GLM (math library)
 - GLSLC (shader compiler)
-  (C\+\+17, g\+\+)
+- (C\+\+17, g\+\+)
 
 # 
 
