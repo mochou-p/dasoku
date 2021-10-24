@@ -77,8 +77,8 @@ namespace ashi
         ashiPipeline = std::make_unique<AshiPipeline>
         (
             ashiDevice,
-            "../shaders/simple_shader.vert.spv",
-            "../shaders/simple_shader.frag.spv",
+            "./shaders/simple_shader.vert.spv",
+            "./shaders/simple_shader.frag.spv",
             pipelineConfig
         );
     }

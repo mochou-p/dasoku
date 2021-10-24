@@ -6,8 +6,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/GLFW/include/**",
-                "C:/GLM/**",
+                "./_dependencies/**",
                 "C:/VulkanSDK/1.2.189.2/Include/**"
             ],
             "defines": [
