@@ -8,14 +8,14 @@ A two-part rendering(/game) engine for Windows
 
 `make hebi`/`make 2d` - build & run **Hebi**
 
-### [Dependencies](https://github.com/vrecusko/Dasoku/tree/master/_dependencies)
+### [Dependencies](https://github.com/vrecusko/Dasoku/tree/master/.dependencies)
 
 # 
 
-### Ashi (3D)
+### [Ashi (3D)](https://github.com/vrecusko/Dasoku/tree/master/Ashi%20(3D))
 > legs
 ![ashi](https://i.imgur.com/dgX9GVo.png "Ashi 3D")
 
-### Hebi (2D)
+### [Hebi (2D)](https://github.com/vrecusko/Dasoku/tree/master/Hebi%20(2D))
 > snake
 ![hebi](https://i.imgur.com/TqOmi6L.png "Hebi 2D")
