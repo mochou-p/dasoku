@@ -12,9 +12,9 @@ A two-part rendering(/game) engine for Windows
 
 # 
 
-### \[WIP\] Ashi (3D)
+### Ashi (3D)
 > legs
-![ashi](https://i.imgur.com/hFgdzDr.png "Ashi 3D")
+![ashi](https://i.imgur.com/dgX9GVo.png "Ashi 3D")
 
 ### Hebi (2D)
 > snake

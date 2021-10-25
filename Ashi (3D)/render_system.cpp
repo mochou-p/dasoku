@@ -13,8 +13,7 @@ namespace ashi
 {
     struct AshiPushConstantData
     {
-        glm::mat2 transform { 1.0f };
-        glm::vec2 offset;
+        glm::mat4 transform { 1.0f };
         alignas(16) glm::vec3 color;
     };
 
@@ -77,8 +76,8 @@ namespace ashi
         ashiPipeline = std::make_unique<AshiPipeline>
         (
             ashiDevice,
-            "./shaders/simple_shader.vert.spv",
-            "./shaders/simple_shader.frag.spv",
+            "./shaders/3D/simple_shader.vert.spv",
+            "./shaders/3D/simple_shader.frag.spv",
             pipelineConfig
         );
     }
@@ -94,16 +93,20 @@ namespace ashi
         for (auto &obj : gameObjects)
         {
             // i wanted to add a cringe joke here but noone would notice
-            obj.transform2d.rotation = glm::mod
+            obj.transform3d.rotation.y = glm::mod
             (
-                obj.transform2d.rotation + 0.01f,
+                obj.transform3d.rotation.y + 0.01f,
+                glm::two_pi<float>()
+            );
+            obj.transform3d.rotation.x = glm::mod
+            (
+                obj.transform3d.rotation.y + 0.005f,
                 glm::two_pi<float>()
             );
 
             AshiPushConstantData push {};
-            push.offset = obj.transform2d.translation;
             push.color = obj.color;
-            push.transform = obj.transform2d.mat2();
+            push.transform = obj.transform3d.mat4();
 
             vkCmdPushConstants
             (

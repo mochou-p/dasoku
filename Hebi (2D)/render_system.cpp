@@ -77,8 +77,8 @@ namespace hebi
         hebiPipeline = std::make_unique<HebiPipeline>
         (
             hebiDevice,
-            "./shaders/simple_shader.vert.spv",
-            "./shaders/simple_shader.frag.spv",
+            "./shaders/2D/simple_shader.vert.spv",
+            "./shaders/2D/simple_shader.frag.spv",
             pipelineConfig
         );
     }

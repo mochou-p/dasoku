@@ -37,24 +37,79 @@ namespace ashi
         vkDeviceWaitIdle(ashiDevice.device());
     }
 
-    void App::loadGameObjects()
+    std::unique_ptr<AshiModel> createCubeModel(AshiDevice& device, glm::vec3 offset)
     {
         std::vector<AshiModel::Vertex> vertices
         {
-            {{  0.0f, -0.5f }, { 1.0f, 1.0f, 0.0f }},
-            {{  0.5f,  0.5f }, { 0.0f, 1.0f, 0.0f }},
-            {{ -0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f }}
+            // left face (white)
+            {{ -.5f, -.5f, -.5f }, {.9f, .9f, .9f}},
+            {{ -.5f,  .5f,  .5f }, {.9f, .9f, .9f}},
+            {{ -.5f, -.5f,  .5f }, {.9f, .9f, .9f}},
+            {{ -.5f, -.5f, -.5f }, {.9f, .9f, .9f}},
+            {{ -.5f,  .5f, -.5f }, {.9f, .9f, .9f}},
+            {{ -.5f,  .5f,  .5f }, {.9f, .9f, .9f}},
+
+            // right face (yellow)
+            {{  .5f, -.5f, -.5f }, {.8f, .8f, .1f}},
+            {{  .5f,  .5f,  .5f }, {.8f, .8f, .1f}},
+            {{  .5f, -.5f,  .5f }, {.8f, .8f, .1f}},
+            {{  .5f, -.5f, -.5f }, {.8f, .8f, .1f}},
+            {{  .5f,  .5f, -.5f }, {.8f, .8f, .1f}},
+            {{  .5f,  .5f,  .5f }, {.8f, .8f, .1f}},
+
+            // top face (orange, remember y axis points down)
+            {{ -.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+            {{  .5f, -.5f,  .5f}, {.9f, .6f, .1f}},
+            {{ -.5f, -.5f,  .5f}, {.9f, .6f, .1f}},
+            {{ -.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+            {{  .5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+            {{  .5f, -.5f,  .5f}, {.9f, .6f, .1f}},
+
+            // bottom face (red)
+            {{ -.5f,  .5f, -.5f }, {.8f, .1f, .1f}},
+            {{  .5f,  .5f,  .5f }, {.8f, .1f, .1f}},
+            {{ -.5f,  .5f,  .5f }, {.8f, .1f, .1f}},
+            {{ -.5f,  .5f, -.5f }, {.8f, .1f, .1f}},
+            {{  .5f,  .5f, -.5f }, {.8f, .1f, .1f}},
+            {{  .5f,  .5f,  .5f }, {.8f, .1f, .1f}},
+
+            // nose face (blue)
+            {{ -.5f, -.5f,  .5f }, {.1f, .1f, .8f}},
+            {{  .5f,  .5f,  .5f }, {.1f, .1f, .8f}},
+            {{ -.5f,  .5f,  .5f }, {.1f, .1f, .8f}},
+            {{ -.5f, -.5f,  .5f }, {.1f, .1f, .8f}},
+            {{  .5f, -.5f,  .5f }, {.1f, .1f, .8f}},
+            {{  .5f,  .5f,  .5f }, {.1f, .1f, .8f}},
+
+            // tail face (green)
+            {{ -.5f, -.5f, -.5f }, {.1f, .8f, .1f}},
+            {{  .5f,  .5f, -.5f }, {.1f, .8f, .1f}},
+            {{ -.5f,  .5f, -.5f }, {.1f, .8f, .1f}},
+            {{ -.5f, -.5f, -.5f }, {.1f, .8f, .1f}},
+            {{  .5f, -.5f, -.5f }, {.1f, .8f, .1f}},
+            {{  .5f,  .5f, -.5f }, {.1f, .8f, .1f}},
         };
 
-        auto ashiModel = std::make_shared<AshiModel>(ashiDevice, vertices);
+        for (auto& v : vertices) {
+            v.position += offset;
+        }
 
-        auto triangle = AshiGameObject::createGameObject();
-        triangle.model = ashiModel;
-        triangle.color = { 1.0f, 0.2f, 0.4f };
-        triangle.transform2d.translation.x = 0.2f;
-        triangle.transform2d.scale = { 2.0f, 0.5f };
-        triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+        return std::make_unique<AshiModel>(device, vertices);
+    }
 
-        gameObjects.push_back(std::move(triangle));
+    void App::loadGameObjects()
+    {
+        std::shared_ptr<AshiModel> ashiModel = createCubeModel
+        (
+            ashiDevice,
+            {.0f, .0f, .0f}
+        );
+
+        auto cube = AshiGameObject::createGameObject();
+        cube.model = ashiModel;
+        cube.transform3d.translation = {.0f, .0f, .5f};
+        cube.transform3d.scale = {.5f, .5f, .5f};
+
+        gameObjects.push_back(std::move(cube));
     }
 }
