@@ -1,5 +1,5 @@
 # Dasoku
-A two-part rendering(/game) engine for Windows
+A two-part **rendering(/game) engine** for Windows using the **Vulkan API**
 
 ### Build
 `make shaders`/`make` - compile shaders
