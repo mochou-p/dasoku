@@ -85,10 +85,13 @@ namespace ashi
     void AshiRenderSystem::renderGameObjects
     (
         VkCommandBuffer commandBuffer,
-        std::vector<AshiGameObject> &gameObjects
+        std::vector<AshiGameObject> &gameObjects,
+        const AshiCamera &camera
     )
     {
         ashiPipeline->bind(commandBuffer);
+
+        auto projectionView = camera.getProjection() * camera.getView();
 
         for (auto &obj : gameObjects)
         {
@@ -100,13 +103,18 @@ namespace ashi
             );
             obj.transform3d.rotation.x = glm::mod
             (
-                obj.transform3d.rotation.y + 0.005f,
+                obj.transform3d.rotation.x + 0.005f,
+                glm::two_pi<float>()
+            );
+            obj.transform3d.rotation.z = glm::mod
+            (
+                obj.transform3d.rotation.z + 0.0025f,
                 glm::two_pi<float>()
             );
 
             AshiPushConstantData push {};
             push.color = obj.color;
-            push.transform = obj.transform3d.mat4();
+            push.transform = projectionView * obj.transform3d.mat4();
 
             vkCmdPushConstants
             (

@@ -5,6 +5,7 @@
 #include "pipeline.hpp"
 #include "device.hpp"
 #include "game_object.hpp"
+#include "camera.hpp"
 
 #include <memory>
 #include <vector>
@@ -23,7 +24,8 @@ namespace ashi
             void renderGameObjects
             (
                 VkCommandBuffer commandBuffer,
-                std::vector<AshiGameObject> &gameObjects
+                std::vector<AshiGameObject> &gameObjects,
+                const AshiCamera &camera
             );
 
         private:

@@ -15,7 +15,7 @@ namespace ashi
         struct Transform3dComponent
         {
             glm::vec3 translation {};
-            glm::vec3 scale { 1.0f, 1.0f, 1.0f };
+            glm::vec3 scale {1.0f, 1.0f, 1.0f};
             glm::vec3 rotation {};
 
             // translate * ry * rx * rz * scale
@@ -64,6 +64,7 @@ namespace ashi
             static AshiGameObject createGameObject()
             {
                 static id_t currentId = 0;
+
                 return AshiGameObject { currentId++ };
             }
 

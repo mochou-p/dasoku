@@ -14,7 +14,7 @@ A two-part **rendering(/game) engine** for Windows using the **Vulkan API**
 
 ### [#](https://github.com/vrecusko/Dasoku/tree/master/Ashi%20(3D)) Ashi
 > legs
-![ashi](https://i.imgur.com/dgX9GVo.png "Ashi")
+![ashi](https://i.imgur.com/gKDv0x7.png "Ashi")
 
 ### [#](https://github.com/vrecusko/Dasoku/tree/master/Hebi%20(2D)) Hebi
 > snake

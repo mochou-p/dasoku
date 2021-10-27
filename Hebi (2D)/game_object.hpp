@@ -32,6 +32,7 @@ namespace hebi
             static HebiGameObject createGameObject()
             {
                 static id_t currentId = 0;
+
                 return HebiGameObject { currentId++ };
             }
 

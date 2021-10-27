@@ -1,2 +1,2 @@
 ## Ashi
-![ashi](https://i.imgur.com/dgX9GVo.png "Ashi")
+![ashi](https://i.imgur.com/gKDv0x7.png "Ashi")

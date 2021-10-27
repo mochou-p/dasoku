@@ -25,6 +25,8 @@ namespace ashi
             VkRenderPass getSwapChainRenderPass() const { return ashiSwapChain->getRenderPass(); }
             bool isFrameInProgres() const { return isFrameStarted; }
 
+            float getAspectRatio() const { return ashiSwapChain->extentAspectRatio(); }
+
             VkCommandBuffer getCurrentCommandBuffer()
             const {
                 assert(isFrameStarted && "cannot get command buffer when frame not in progress");
