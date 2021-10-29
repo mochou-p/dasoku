@@ -11,7 +11,7 @@ namespace ashi
         float near, float far
     )
     {
-        projectionMatrix = glm::mat4{1.0f};
+        projectionMatrix = glm::mat4 {1.0f};
         projectionMatrix[0][0] = 2.f / (right - left);
         projectionMatrix[1][1] = 2.f / (bottom - top);
         projectionMatrix[2][2] = 1.f / (far - near);
@@ -27,8 +27,8 @@ namespace ashi
     )
     {
         assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
-        const float tanHalfFovy = tan(fovy / 2.f);
-        projectionMatrix = glm::mat4{0.0f};
+        const float tanHalfFovy = tan(fovy * 0.5f);
+        projectionMatrix = glm::mat4 {0.0f};
         projectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);
         projectionMatrix[1][1] = 1.f / (tanHalfFovy);
         projectionMatrix[2][2] = far / (far - near);

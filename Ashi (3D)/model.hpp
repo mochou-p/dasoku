@@ -24,10 +24,16 @@ namespace ashi
                 static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
             };
 
+            struct Data
+            {
+                std::vector<Vertex> vertices {};
+                std::vector<uint32_t> indices {};
+            };
+
             AshiModel
             (
                 AshiDevice &device,
-                const std::vector<Vertex> &vertices
+                const AshiModel::Data &data
             );
             ~AshiModel();
 
@@ -39,10 +45,17 @@ namespace ashi
 
         private:
             void createVertexBuffers(const std::vector<Vertex> &vertices);
+            void createIndexBuffer(const std::vector<uint32_t> &indices);
 
             AshiDevice &ashiDevice;
+
             VkBuffer vertexBuffer;
             VkDeviceMemory vertexBufferMemory;
             uint32_t vertexCount;
+
+            bool hasIndexBuffer = false;
+            VkBuffer indexBuffer;
+            VkDeviceMemory indexBufferMemory;
+            uint32_t indexCount;
     };
 }
