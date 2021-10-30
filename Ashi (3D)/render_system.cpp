@@ -13,7 +13,7 @@ namespace ashi
 {
     struct AshiPushConstantData
     {
-        glm::mat4 transform { 1.0f };
+        glm::mat4 transform {1.0f};
         alignas(16) glm::vec3 color;
     };
 
@@ -76,8 +76,8 @@ namespace ashi
         ashiPipeline = std::make_unique<AshiPipeline>
         (
             ashiDevice,
-            "./shaders/3D/simple_shader.vert.spv",
-            "./shaders/3D/simple_shader.frag.spv",
+            ".\\shaders\\3D\\simple_shader.vert.spv",
+            ".\\shaders\\3D\\simple_shader.frag.spv",
             pipelineConfig
         );
     }

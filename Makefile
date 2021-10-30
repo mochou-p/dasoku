@@ -4,9 +4,10 @@ VULKAN_SDK_PATH = C:\VulkanSDK\1.2.189.2
 GLFW_PATH = .\..\.dependencies\GLFW
 GLM_PATH = .\..\.dependencies\GLM
 GLSLC_PATH = .\.dependencies\GLSLC
+TINYOBJ_PATH = .\..\.dependencies\TINYOBJ
 SHADERS_PATH = .\shaders
 
-CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)\include -I$(VULKAN_SDK_PATH)\include
+CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)\include -I$(VULKAN_SDK_PATH)\include -I$(TINYOBJ_PATH)
 LDFLAGS = -L$(VULKAN_SDK_PATH)\lib -L$(GLFW_PATH)\lib -lglfw3 -lvulkan-1 -lgdi32
 
 COMPILE_SHADERS = for /r $(SHADERS_PATH) %%f in (*.*) do $(GLSLC_PATH)\glslc.exe %%f -o %%f.spv
