@@ -61,7 +61,7 @@ namespace ashi
             );
 
             float aspect = ashiRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 20.0f);
 
             if (auto commandBuffer = ashiRenderer.beginFrame())
             {
@@ -77,14 +77,30 @@ namespace ashi
 
     void App::loadGameObjects()
     {
-        std::shared_ptr<AshiModel> ashiModel =
+        std::shared_ptr<AshiModel> ashiModel;
+
+        // ashiModel =
+        //     AshiModel::createModelFromFile(ashiDevice, ".\\models\\smooth_vase.obj");
+        // auto smoothVase = AshiGameObject::createGameObject();
+        // smoothVase.model = ashiModel;
+        // smoothVase.transform3d.translation = {-0.5f, 0.5f, 2.5f};
+        // smoothVase.transform3d.scale = glm::vec3(3.0f);
+        // gameObjects.push_back(std::move(smoothVase));
+
+        ashiModel =
+            AshiModel::createModelFromFile(ashiDevice, ".\\models\\cottage.obj");
+        auto cottage = AshiGameObject::createGameObject();
+        cottage.model = ashiModel;
+        cottage.transform3d.translation = {-0.5f, 0.5f, 2.5f};
+        cottage.transform3d.scale = glm::vec3(0.2f, -0.2f, 0.2f);
+        gameObjects.push_back(std::move(cottage));
+
+        ashiModel =
             AshiModel::createModelFromFile(ashiDevice, ".\\models\\colored_cube.obj");
-
-        auto cube = AshiGameObject::createGameObject();
-        cube.model = ashiModel;
-        cube.transform3d.translation = {0.0f, 0.0f, 2.5f};
-        cube.transform3d.scale = {0.5f, 0.5f, 0.5f};
-
-        gameObjects.push_back(std::move(cube));
+        auto coloredCube = AshiGameObject::createGameObject();
+        coloredCube.model = ashiModel;
+        coloredCube.transform3d.translation = {0.5f, 0.5f, 2.5f};
+        coloredCube.transform3d.scale = glm::vec3(5.0f);
+        gameObjects.push_back(std::move(coloredCube));
     }
 }

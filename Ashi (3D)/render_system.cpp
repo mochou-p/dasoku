@@ -14,7 +14,7 @@ namespace ashi
     struct AshiPushConstantData
     {
         glm::mat4 transform {1.0f};
-        alignas(16) glm::vec3 color;
+        glm::mat4 normalMatrix {1.0f};
     };
 
     AshiRenderSystem::AshiRenderSystem
@@ -96,8 +96,9 @@ namespace ashi
         for (auto &obj : gameObjects)
         {
             AshiPushConstantData push {};
-            push.color = obj.color;
-            push.transform = projectionView * obj.transform3d.mat4();
+            auto modelMatrix = obj.transform3d.mat4();
+            push.transform = projectionView * modelMatrix;
+            push.normalMatrix = obj.transform3d.normalMatrix();
 
             vkCmdPushConstants
             (
