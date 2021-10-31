@@ -82,6 +82,10 @@ namespace ashi
 
             VkPhysicalDeviceProperties properties;
 
+            VkInstance getInstance() { return instance; }
+            VkPhysicalDevice getPhysicalDevice() { return physicalDevice; }
+            VkQueue getGraphicsQueue() { return graphicsQueue_; }
+
         private:
             void createInstance();
             void setupDebugMessenger();

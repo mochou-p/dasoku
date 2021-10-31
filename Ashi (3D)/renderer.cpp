@@ -2,6 +2,8 @@
 
 #include "renderer.hpp"
 
+#include "imgui_impl_vulkan.h"
+
 #include <stdexcept>
 
 namespace ashi 
@@ -201,6 +203,8 @@ namespace ashi
     {
         assert(isFrameStarted && "can't call endSwapChainRenderPass if frame is not in progress");
         assert(commandBuffer == getCurrentCommandBuffer() && "can't end render pass on command buffer from a different frame");
+
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
         vkCmdEndRenderPass(commandBuffer);
     }

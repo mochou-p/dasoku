@@ -29,6 +29,10 @@ namespace ashi
         private:
             void loadGameObjects();
 
+            void initImgui();
+
+            VkDescriptorPool imguiPool;
+
             AshiWindow ashiWindow { WIDTH, HEIGHT, "ashi" };
             AshiDevice ashiDevice { ashiWindow };
             AshiRenderer ashiRenderer { ashiWindow, ashiDevice };

@@ -5,6 +5,10 @@
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_vulkan.h"
+#include "imgui_impl_glfw.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -17,7 +21,11 @@ namespace ashi
 {
     App::App() { loadGameObjects(); }
 
-    App::~App() {}
+    App::~App()
+    {
+        vkDestroyDescriptorPool(ashiDevice.device(), imguiPool, nullptr);
+        ImGui_ImplVulkan_Shutdown();
+    }
 
     void App::run()
     {
@@ -33,6 +41,8 @@ namespace ashi
 
         auto viewerObject = AshiGameObject::createGameObject();
         AshiKeyboardMovementController cameraController {};
+
+        initImgui();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -63,44 +73,97 @@ namespace ashi
             float aspect = ashiRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 20.0f);
 
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+
+            ImGui::NewFrame();
+
+            ImGui::Begin("hello");
+            ImGui::Button("reynep");
+            ImGui::End();
+
+            ImGui::Render();
+
             if (auto commandBuffer = ashiRenderer.beginFrame())
             {
                 ashiRenderer.beginSwapChainRenderPass(commandBuffer);
                 ashiRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
+                ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
                 ashiRenderer.endSwapChainRenderPass(commandBuffer);
                 ashiRenderer.endFrame();
+
             }
         }
 
         vkDeviceWaitIdle(ashiDevice.device());
+
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 
     void App::loadGameObjects()
     {
         std::shared_ptr<AshiModel> ashiModel;
 
-        // ashiModel =
-        //     AshiModel::createModelFromFile(ashiDevice, ".\\models\\smooth_vase.obj");
-        // auto smoothVase = AshiGameObject::createGameObject();
-        // smoothVase.model = ashiModel;
-        // smoothVase.transform3d.translation = {-0.5f, 0.5f, 2.5f};
-        // smoothVase.transform3d.scale = glm::vec3(3.0f);
-        // gameObjects.push_back(std::move(smoothVase));
-
         ashiModel =
-            AshiModel::createModelFromFile(ashiDevice, ".\\models\\cottage.obj");
-        auto cottage = AshiGameObject::createGameObject();
-        cottage.model = ashiModel;
-        cottage.transform3d.translation = {-0.5f, 0.5f, 2.5f};
-        cottage.transform3d.scale = glm::vec3(0.2f, -0.2f, 0.2f);
-        gameObjects.push_back(std::move(cottage));
+            AshiModel::createModelFromFile(ashiDevice, ".\\models\\smooth_vase.obj");
+        auto vase = AshiGameObject::createGameObject();
+        vase.model = ashiModel;
+        vase.transform3d.translation = {0.0f, 0.5f, 2.5f};
+        vase.transform3d.scale = glm::vec3(3.0f);
+        gameObjects.push_back(std::move(vase));
+    }
 
-        ashiModel =
-            AshiModel::createModelFromFile(ashiDevice, ".\\models\\colored_cube.obj");
-        auto coloredCube = AshiGameObject::createGameObject();
-        coloredCube.model = ashiModel;
-        coloredCube.transform3d.translation = {0.5f, 0.5f, 2.5f};
-        coloredCube.transform3d.scale = glm::vec3(5.0f);
-        gameObjects.push_back(std::move(coloredCube));
+    void App::initImgui()
+    {
+        VkDescriptorPoolSize pool_sizes[] =
+            {
+                { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+            };
+
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        pool_info.maxSets = 1000;
+        pool_info.poolSizeCount = std::size(pool_sizes);
+        pool_info.pPoolSizes = pool_sizes;
+
+        vkCreateDescriptorPool(ashiDevice.device(), &pool_info, nullptr, &imguiPool);
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+
+        ImGuiIO &io = ImGui::GetIO();
+
+        ImGui_ImplGlfw_InitForVulkan(ashiWindow.getGLFWwindow(), true);
+
+        ImGui_ImplVulkan_InitInfo init_info = {};
+        init_info.Instance = ashiDevice.getInstance();
+        init_info.PhysicalDevice = ashiDevice.getPhysicalDevice();
+        init_info.Device = ashiDevice.device();
+        init_info.Queue = ashiDevice.getGraphicsQueue();
+        init_info.DescriptorPool = imguiPool;
+        init_info.MinImageCount = 3;
+        init_info.ImageCount = 3;
+        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+        ImGui_ImplVulkan_Init(&init_info, ashiRenderer.getSwapChainRenderPass());
+
+        ImGui::StyleColorsDark();
+
+        ImGui_ImplVulkan_CreateFontsTexture(ashiDevice.beginSingleTimeCommands());
+
+        ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 }
