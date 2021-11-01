@@ -35,4 +35,4 @@ shaders:
 	$(COMPILE_SHADERS)
 	$(MOVE_SHADERS)
 
-#.SILENT:
+.SILENT:
