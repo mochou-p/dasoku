@@ -29,13 +29,15 @@ namespace dsk
         private:
             void loadGameObjects();
 
-            void initImgui();
+            void initImGui();
+            void setupImGui(glm::vec3 viewerPos);
+            void renderImGui(VkCommandBuffer commandBuffer);
 
             VkDescriptorPool imguiPool;
 
-            DskWindow dskWindow { WIDTH, HEIGHT, "dsk" };
-            DskDevice dskDevice { dskWindow };
-            DskRenderer dskRenderer { dskWindow, dskDevice };
+            DskWindow dskWindow {WIDTH, HEIGHT, "dsk"};
+            DskDevice dskDevice {dskWindow};
+            DskRenderer dskRenderer {dskWindow, dskDevice};
 
             std::vector<DskGameObject> gameObjects;
     };

@@ -47,17 +47,7 @@ namespace dsk
         createIndexBuffer(data.indices);
     }
 
-    DskModel::~DskModel()
-    {
-        vkDestroyBuffer(dskDevice.device(), vertexBuffer, nullptr);
-        vkFreeMemory(dskDevice.device(), vertexBufferMemory, nullptr);
-
-        if (hasIndexBuffer)
-        {
-            vkDestroyBuffer(dskDevice.device(), indexBuffer, nullptr);
-            vkFreeMemory(dskDevice.device(), indexBufferMemory, nullptr);
-        }
-    }
+    DskModel::~DskModel() {}
     
     std::unique_ptr<DskModel> DskModel::createModelFromFile
     (
@@ -75,57 +65,34 @@ namespace dsk
     {
         vertexCount = static_cast<uint32_t>(vertices.size());
         assert(vertexCount >= 3 && "vertex count must be at least 3");
-        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
 
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        dskDevice.createBuffer
-        (
-            bufferSize,
+        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
+        uint32_t vertexSize = sizeof(vertices[0]);
+
+        DskBuffer stagingBuffer
+        {
+            dskDevice,
+            vertexSize,
+            vertexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            stagingBuffer,
-            stagingBufferMemory
-        );
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        };
 
-        void *data;
-        vkMapMemory
-        (
-            dskDevice.device(),
-            stagingBufferMemory,
-            0,
-            bufferSize,
-            0,
-            &data
-        );
-        memcpy
-        (
-            data,
-            vertices.data(),
-            static_cast<size_t>(bufferSize)
-        );
-        vkUnmapMemory
-        (
-            dskDevice.device(),
-            stagingBufferMemory
-        );
+        stagingBuffer.map();
+        stagingBuffer.writeToBuffer((void *)vertices.data());
 
-        dskDevice.createBuffer
+        vertexBuffer = std::make_unique<DskBuffer>
         (
-            bufferSize,
+            dskDevice,
+            vertexSize,
+            vertexCount,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            vertexBuffer,
-            vertexBufferMemory
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-        dskDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-        vkDestroyBuffer(dskDevice.device(), stagingBuffer, nullptr);
-        vkFreeMemory(dskDevice.device(), stagingBufferMemory, nullptr);
-
+        dskDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
     }
 
     void DskModel::createIndexBuffer(const std::vector<uint32_t> &indices)
@@ -136,65 +103,43 @@ namespace dsk
         if (!hasIndexBuffer) { return; }
 
         VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        dskDevice.createBuffer
-        (
-            bufferSize,
+        uint32_t indexSize = sizeof(indices[0]);
+        
+        DskBuffer stagingBuffer
+        {
+            dskDevice,
+            indexSize,
+            indexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            stagingBuffer,
-            stagingBufferMemory
-        );
+            VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+        };
 
-        void *data;
-        vkMapMemory
-        (
-            dskDevice.device(),
-            stagingBufferMemory,
-            0,
-            bufferSize,
-            0,
-            &data
-        );
-        memcpy
-        (
-            data,
-            indices.data(),
-            static_cast<size_t>(bufferSize)
-        );
-        vkUnmapMemory
-        (
-            dskDevice.device(),
-            stagingBufferMemory
-        );
+        stagingBuffer.map();
+        stagingBuffer.writeToBuffer((void *)indices.data());
 
-        dskDevice.createBuffer
+        indexBuffer = std::make_unique<DskBuffer>
         (
-            bufferSize,
+            dskDevice,
+            indexSize,
+            indexCount,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-            indexBuffer,
-            indexBufferMemory
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
-
-        dskDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-        vkDestroyBuffer(dskDevice.device(), stagingBuffer, nullptr);
-        vkFreeMemory(dskDevice.device(), stagingBufferMemory, nullptr);
+        
+        dskDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
     }
 
     void DskModel::bind(VkCommandBuffer commandBuffer)
     {
-        VkBuffer buffers[] = { vertexBuffer };
-        VkDeviceSize offsets[] = { 0 };
+        VkBuffer buffers[] = {vertexBuffer->getBuffer()};
+        VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
         if (hasIndexBuffer)
         {
-            vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
         }
     }
 
@@ -212,13 +157,8 @@ namespace dsk
 
     std::vector<VkVertexInputBindingDescription> DskModel::Vertex::getBindingDescriptions()
     {
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-        bindingDescriptions[0].binding = 0;
-        bindingDescriptions[0].stride = sizeof(Vertex);
-        bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        // BINDING, STRIDE, INPUTRATE
         return {
+            // BINDING, STRIDE, INPUTRATE
             {0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX}
         };
     }

@@ -84,14 +84,13 @@ namespace dsk
 
     void DskRenderSystem::renderGameObjects
     (
-        VkCommandBuffer commandBuffer,
-        std::vector<DskGameObject> &gameObjects,
-        const DskCamera &camera
+        FrameInfo &frameInfo,
+        std::vector<DskGameObject> &gameObjects
     )
     {
-        dskPipeline->bind(commandBuffer);
+        dskPipeline->bind(frameInfo.commandBuffer);
 
-        auto projectionView = camera.getProjection() * camera.getView();
+        auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
         for (auto &obj : gameObjects)
         {
@@ -102,15 +101,15 @@ namespace dsk
 
             vkCmdPushConstants
             (
-                commandBuffer,
+                frameInfo.commandBuffer,
                 pipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(DskPushConstantData),
                 &push
             );
-            obj.model->bind(commandBuffer);
-            obj.model->draw(commandBuffer);
+            obj.model->bind(frameInfo.commandBuffer);
+            obj.model->draw(frameInfo.commandBuffer);
         }
     }
 }

@@ -4,6 +4,7 @@
 #include "render_system.hpp"
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
+#include "buffer.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -19,6 +20,12 @@
 
 namespace dsk
 {
+    struct GlobalUbo
+    {
+        glm::mat4 projectionView {1.0f};
+        glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+    };
+
     App::App() { loadGameObjects(); }
 
     App::~App()
@@ -28,8 +35,23 @@ namespace dsk
 
     void App::run()
     {
+        std::vector<std::unique_ptr<DskBuffer>> uboBuffers(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
+
+        for (int i = 0; i < uboBuffers.size(); i++)
+        {
+            uboBuffers[i] = std::make_unique<DskBuffer>
+            (
+                dskDevice,
+                sizeof(GlobalUbo),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+            );
+            uboBuffers[i]->map();
+        }
+
         DskRenderSystem dskRenderSystem
-        { dskDevice, dskRenderer.getSwapChainRenderPass() };
+        {dskDevice, dskRenderer.getSwapChainRenderPass()};
 
         DskCamera camera {};
         camera.setViewTarget
@@ -41,7 +63,7 @@ namespace dsk
         auto viewerObject = DskGameObject::createGameObject();
         DskKeyboardMovementController cameraController {};
 
-        initImgui();
+        initImGui();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -53,9 +75,6 @@ namespace dsk
             float frameTime = std::chrono::duration
                 <float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
-
-            // fixes weird behavior when resizing and using the keyboard at the same time
-            // frameTime = glm::min(frameTime, MAX_FRAME_TIME);
 
             cameraController.moveInPlaneXZ
             (
@@ -72,55 +91,28 @@ namespace dsk
             float aspect = dskRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 50.0f);
 
-            ImGui_ImplVulkan_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-
-            ImGui::NewFrame();
-
-            ImGui::PushStyleColor(ImGuiCol_TitleBg,  {0.0f, 0.0f, 0.0f, 1.0f});
-            ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.8f});
-            ImGui::PushStyleColor(ImGuiCol_Border,   {0.0f, 0.0f, 0.0f, 1.0f});
-
-            ImGui::Begin
-            (
-                "Frametime",
-                nullptr,
-                ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoMove
-            );
-            ImGui::Text
-            (
-                "%.2fms (%.0f FPS)",
-                1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate
-            );
-            ImGui::End();
-
-            ImGui::Begin
-            (
-                "Viewer",
-                nullptr,
-                ImGuiWindowFlags_NoCollapse |
-                ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoMove
-            );
-            ImGui::BeginChild("position");
-            ImGui::Text("x: %.4f", viewerObject.transform3d.translation.x);
-            ImGui::Text("y: %.4f", -viewerObject.transform3d.translation.y);
-            ImGui::Text("z: %.4f", viewerObject.transform3d.translation.z);
-            ImGui::EndChild();
-            ImGui::End();
-
-            ImGui::PopStyleColor(3);
-
-            ImGui::Render();
+            setupImGui(viewerObject.transform3d.translation);
 
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
+                int frameIndex = dskRenderer.getFrameIndex();
+                FrameInfo frameInfo
+                {
+                    frameIndex,
+                    frameTime,
+                    commandBuffer,
+                    camera
+                };
+                // update
+                GlobalUbo ubo {};
+                ubo.projectionView = camera.getProjection() * camera.getView();
+                uboBuffers[frameIndex]->writeToBuffer(&ubo);
+                uboBuffers[frameIndex]->flush();
+
+                // render
                 dskRenderer.beginSwapChainRenderPass(commandBuffer);
-                dskRenderSystem.renderGameObjects(commandBuffer, gameObjects, camera);
-                ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+                dskRenderSystem.renderGameObjects(frameInfo, gameObjects);
+                renderImGui(commandBuffer);
                 dskRenderer.endSwapChainRenderPass(commandBuffer);
                 dskRenderer.endFrame();
             }
@@ -139,6 +131,7 @@ namespace dsk
     {
         std::shared_ptr<DskModel> dskModel;
 
+        // TODO: simplify this
         dskModel =
             DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\colored_cube.obj");
         auto cube = DskGameObject::createGameObject();
@@ -164,7 +157,7 @@ namespace dsk
         gameObjects.push_back(std::move(catgirl));
     }
 
-    void App::initImgui()
+    void App::initImGui()
     {
         VkDescriptorPoolSize pool_sizes[] =
             {
@@ -181,7 +174,7 @@ namespace dsk
                 { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
             };
 
-        VkDescriptorPoolCreateInfo pool_info = {};
+        VkDescriptorPoolCreateInfo pool_info {};
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         pool_info.maxSets = 1000;
@@ -197,7 +190,7 @@ namespace dsk
 
         ImGui_ImplGlfw_InitForVulkan(dskWindow.getGLFWwindow(), true);
 
-        ImGui_ImplVulkan_InitInfo init_info = {};
+        ImGui_ImplVulkan_InitInfo init_info {};
         init_info.Instance = dskDevice.getInstance();
         init_info.PhysicalDevice = dskDevice.getPhysicalDevice();
         init_info.Device = dskDevice.device();
@@ -216,5 +209,57 @@ namespace dsk
         dskDevice.endSingleTimeCommands(textureCommandBuffer);
 
         ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+    void App::setupImGui(glm::vec3 viewerPos)
+    {
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+
+        ImGui::NewFrame();
+
+        ImGui::PushStyleColor(ImGuiCol_TitleBg,  {0.0f, 0.0f, 0.0f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.8f});
+        ImGui::PushStyleColor(ImGuiCol_Border,   {0.0f, 0.0f, 0.0f, 1.0f});
+
+        ImGui::Begin
+        (
+            "Frametime",
+            nullptr,
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoFocusOnAppearing
+        );
+            ImGui::Text
+            (
+                "%.2fms (%.0f FPS)",
+                1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate
+            );
+        ImGui::End();
+
+        ImGui::Begin
+        (
+            "Viewer",
+            nullptr,
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoFocusOnAppearing
+        );
+            ImGui::Text("x: %.4f", viewerPos.x);
+            ImGui::Text("y: %.4f", -viewerPos.y);
+            ImGui::Text("z: %.4f", viewerPos.z);
+        ImGui::End();
+
+        ImGui::PopStyleColor(3);
+
+        ImGui::Render();
+    }
+    
+    void App::renderImGui(VkCommandBuffer commandBuffer)
+    {
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
     }
 }

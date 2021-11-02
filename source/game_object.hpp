@@ -29,7 +29,7 @@ namespace dsk
             {
                 static id_t currentId = 0;
 
-                return DskGameObject { currentId++ };
+                return DskGameObject {currentId++};
             }
 
             DskGameObject(const DskGameObject &) = delete;

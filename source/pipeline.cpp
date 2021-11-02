@@ -30,7 +30,7 @@ namespace dsk
 
     std::vector<char> DskPipeline::readFile(const std::string &filepath)
     {
-        std::ifstream file { filepath, std::ios::ate | std::ios::binary };
+        std::ifstream file {filepath, std::ios::ate | std::ios::binary};
 
         if (!file.is_open())
         {
@@ -228,7 +228,7 @@ namespace dsk
         configInfo.depthStencilInfo.front = {};  // optional
         configInfo.depthStencilInfo.back = {};   // optional
 
-        configInfo.dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+        configInfo.dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
         configInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
         configInfo.dynamicStateInfo.dynamicStateCount = 
