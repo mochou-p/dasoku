@@ -6,6 +6,7 @@
 #include "device.hpp"
 #include "game_object.hpp"
 #include "renderer.hpp"
+#include "descriptors.hpp"
 
 #include <memory>
 #include <vector>
@@ -39,6 +40,8 @@ namespace dsk
             DskDevice dskDevice {dskWindow};
             DskRenderer dskRenderer {dskWindow, dskDevice};
 
+            // order of decls matters
+            std::unique_ptr<DskDescriptorPool> globalPool {};
             std::vector<DskGameObject> gameObjects;
     };
 }

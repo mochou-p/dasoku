@@ -14,5 +14,6 @@ namespace dsk
         float frameTime;
         VkCommandBuffer commandBuffer;
         DskCamera &camera;
+        VkDescriptorSet globalDescriptorSet;
     };
 }

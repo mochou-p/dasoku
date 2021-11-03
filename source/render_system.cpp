@@ -13,17 +13,18 @@ namespace dsk
 {
     struct DskPushConstantData
     {
-        glm::mat4 transform {1.0f};
+        glm::mat4 modelMatrix {1.0f};
         glm::mat4 normalMatrix {1.0f};
     };
 
     DskRenderSystem::DskRenderSystem
     (
         DskDevice &device,
-        VkRenderPass renderPass
+        VkRenderPass renderPass,
+        VkDescriptorSetLayout globalSetLayout
     ): dskDevice{device}
     {
-        createPipelineLayout();
+        createPipelineLayout(globalSetLayout);
         createPipeline(renderPass);
     }
 
@@ -37,17 +38,19 @@ namespace dsk
         );
     }
 
-    void DskRenderSystem::createPipelineLayout()
+    void DskRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
     {
         VkPushConstantRange pushConstantRange {};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
         pushConstantRange.size = sizeof(DskPushConstantData);
 
+        std::vector<VkDescriptorSetLayout> descriptorSetLayout {globalSetLayout};
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 0;
-        pipelineLayoutInfo.pSetLayouts = nullptr;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayout.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayout.data();
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
@@ -90,13 +93,22 @@ namespace dsk
     {
         dskPipeline->bind(frameInfo.commandBuffer);
 
-        auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
+        vkCmdBindDescriptorSets
+        (
+            frameInfo.commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout,
+            0,
+            1,
+            &frameInfo.globalDescriptorSet,
+            0,
+            nullptr
+        );
 
         for (auto &obj : gameObjects)
         {
             DskPushConstantData push {};
-            auto modelMatrix = obj.transform3d.mat4();
-            push.transform = projectionView * modelMatrix;
+            push.modelMatrix = obj.transform3d.mat4();
             push.normalMatrix = obj.transform3d.normalMatrix();
 
             vkCmdPushConstants

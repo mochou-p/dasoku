@@ -16,7 +16,12 @@ namespace dsk
     class DskRenderSystem
     {
         public:
-            DskRenderSystem(DskDevice &device, VkRenderPass renderPass);
+            DskRenderSystem
+            (
+                DskDevice &device,
+                VkRenderPass renderPass,
+                VkDescriptorSetLayout globalSetLayout
+            );
             ~DskRenderSystem();
 
             DskRenderSystem(const DskRenderSystem &) = delete;
@@ -29,7 +34,7 @@ namespace dsk
             );
 
         private:
-            void createPipelineLayout();
+            void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
             void createPipeline(VkRenderPass renderPass);
 
             DskDevice &dskDevice;

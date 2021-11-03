@@ -26,7 +26,20 @@ namespace dsk
         glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
     };
 
-    App::App() { loadGameObjects(); }
+    App::App()
+    {
+        globalPool =
+            DskDescriptorPool::Builder(dskDevice)
+                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT)
+                .addPoolSize
+                (
+                    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    DskSwapChain::MAX_FRAMES_IN_FLIGHT
+                )
+                .build();
+
+        loadGameObjects();
+    }
 
     App::~App()
     {
@@ -50,8 +63,26 @@ namespace dsk
             uboBuffers[i]->map();
         }
 
+        auto globalSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+        
+        std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
+        
+        for (int i = 0; i < globalDescriptorSets.size(); i++)
+        {
+            auto bufferInfo = uboBuffers[i]->descriptorInfo();
+            DskDescriptorWriter(*globalSetLayout, *globalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
+        }
+
         DskRenderSystem dskRenderSystem
-        {dskDevice, dskRenderer.getSwapChainRenderPass()};
+        {
+            dskDevice,
+            dskRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout()
+        };
 
         DskCamera camera {};
         camera.setViewTarget
@@ -101,8 +132,10 @@ namespace dsk
                     frameIndex,
                     frameTime,
                     commandBuffer,
-                    camera
+                    camera,
+                    globalDescriptorSets[frameIndex]
                 };
+
                 // update
                 GlobalUbo ubo {};
                 ubo.projectionView = camera.getProjection() * camera.getView();
