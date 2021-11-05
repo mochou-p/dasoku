@@ -31,11 +31,11 @@ namespace dsk
     {
         globalPool =
             DskDescriptorPool::Builder(dskDevice)
-                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + 1)
+                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + 3)
                 .addPoolSize
                 (
                     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + 1
+                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + 3
                 )
                 .addPoolSize
                 (
@@ -44,7 +44,7 @@ namespace dsk
                 )
                 .build();
 
-        loadGameObjects();
+        loadGameObjects(*globalPool);
     }
 
     App::~App()
@@ -73,10 +73,6 @@ namespace dsk
             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
             .build();
         
-        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-            .build();
-
         std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
         
         for (int i = 0; i < globalDescriptorSets.size(); i++)
@@ -87,44 +83,16 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
-        VkPhysicalDeviceProperties properties {};
-        vkGetPhysicalDeviceProperties(dskDevice.getPhysicalDevice(), &properties);
-
-        VkSamplerCreateInfo samplerInfo {};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        // samplerInfo.anisotropyEnable = VK_TRUE;
-        // samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-
-        VkSampler sampler;
-        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
-
-        DskTexture texture;
-        texture.loadImage(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
-
-        VkDescriptorImageInfo imageInfo {};
-        imageInfo.sampler = sampler;
-        imageInfo.imageView = texture.imageView;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        VkDescriptorSet textureDescriptorSet;
-        DskDescriptorWriter(*textureSetLayout, *globalPool)
-            .writeImage(0, &imageInfo)
-            .build(textureDescriptorSet);
+        auto _textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
 
         DskRenderSystem dskRenderSystem
         {
             dskDevice,
             dskRenderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout(),
-            textureSetLayout->getDescriptorSetLayout()
+            _textureSetLayout->getDescriptorSetLayout()
         };
 
         DskCamera camera {};
@@ -176,12 +144,7 @@ namespace dsk
                     frameTime,
                     commandBuffer,
                     camera,
-                    globalDescriptorSets[frameIndex],
-                    textureDescriptorSet,
-                    {
-                        globalDescriptorSets[frameIndex],
-                        textureDescriptorSet
-                    }
+                    globalDescriptorSets[frameIndex]
                 };
 
                 // update
@@ -208,17 +171,24 @@ namespace dsk
         ImGui::DestroyContext();
     }
 
-    void App::loadGameObjects()
+    void App::loadGameObjects(DskDescriptorPool &globalPool)
     {
         std::shared_ptr<DskModel> dskModel;
 
         // TODO: simplify this
         dskModel =
             DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\colored_cube.obj");
+        
         auto cube = DskGameObject::createGameObject();
         cube.model = dskModel;
         cube.transform3d.translation = {0.0f, 0.3f, 2.5f};
         cube.transform3d.scale = {10.0f, 0.2f, 10.0f};
+        cube.textureDescriptorSet = makeTextureDescriptorSet
+        (
+            ".\\resources\\textures\\Floor.png",
+            dskDevice,
+            &globalPool
+        );
         gameObjects.push_back(std::move(cube));
 
         dskModel =
@@ -227,6 +197,12 @@ namespace dsk
         vase.model = dskModel;
         vase.transform3d.translation = {0.3f, 0.1f, 2.5f};
         vase.transform3d.scale = glm::vec3(1.0f);
+        vase.textureDescriptorSet = makeTextureDescriptorSet
+        (
+            ".\\resources\\textures\\Paper.png",
+            dskDevice,
+            &globalPool
+        );
         gameObjects.push_back(std::move(vase));
 
         dskModel =
@@ -235,7 +211,54 @@ namespace dsk
         catgirl.model = dskModel;
         catgirl.transform3d.translation = {-0.3f, 0.02f, 2.5f};
         catgirl.transform3d.scale = {0.3f, -0.3f, 0.3f};
+        catgirl.textureDescriptorSet = makeTextureDescriptorSet
+        (
+            ".\\resources\\models\\neco-arc\\BaseColor.png",
+            dskDevice,
+            &globalPool
+        );
         gameObjects.push_back(std::move(catgirl));
+    }
+
+    VkDescriptorSet App::makeTextureDescriptorSet
+    (
+        std::string filename,
+        DskDevice &dskDevice,
+        DskDescriptorPool *globalPool
+    )
+    {
+        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
+        VkSamplerCreateInfo samplerInfo {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+
+        VkSampler sampler;
+        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
+
+        DskTexture texture;
+        texture.loadImage(filename, dskDevice);
+
+        VkDescriptorImageInfo imageInfo {};
+        imageInfo.sampler = sampler;
+        imageInfo.imageView = texture.imageView;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkDescriptorSet textureDescriptorSet;
+        DskDescriptorWriter(*textureSetLayout, *globalPool)
+            .writeImage(0, &imageInfo)
+            .build(textureDescriptorSet);
+        
+        return textureDescriptorSet;
     }
 
     void App::initImGui()

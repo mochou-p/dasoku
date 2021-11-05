@@ -1,5 +1,5 @@
 # Dasoku
-![Dasoku](https://i.imgur.com/UXQXvZV.png "Dasoku")
+![Dasoku](https://i.imgur.com/rfRWlsD.png "Dasoku")
 
 ## Dependencies
 #### Need to install

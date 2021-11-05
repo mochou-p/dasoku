@@ -43,6 +43,8 @@ namespace dsk
             glm::vec3 color {};
             Transform3dComponent transform3d {};
 
+            VkDescriptorSet textureDescriptorSet;
+
         private:
             DskGameObject(id_t objId): id{objId} {}
 

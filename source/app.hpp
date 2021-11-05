@@ -28,7 +28,13 @@ namespace dsk
             void run();
 
         private:
-            void loadGameObjects();
+            void loadGameObjects(DskDescriptorPool &globalPool);
+            VkDescriptorSet makeTextureDescriptorSet
+            (
+                std::string filename,
+                DskDevice &dskDevice,
+                DskDescriptorPool *globalPool
+            );
 
             void initImGui();
             void setupImGui(glm::vec3 viewerPos);
@@ -36,7 +42,7 @@ namespace dsk
 
             VkDescriptorPool imguiPool;
 
-            DskWindow dskWindow {WIDTH, HEIGHT, "dsk"};
+            DskWindow dskWindow {WIDTH, HEIGHT, "Dasoku"};
             DskDevice dskDevice {dskWindow};
             DskRenderer dskRenderer {dskWindow, dskDevice};
 

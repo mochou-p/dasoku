@@ -15,7 +15,5 @@ namespace dsk
         VkCommandBuffer commandBuffer;
         DskCamera &camera;
         VkDescriptorSet globalDescriptorSet;
-        VkDescriptorSet textureDescriptorSet;
-        VkDescriptorSet sets[2] = {globalDescriptorSet, textureDescriptorSet};
     };
 }
