@@ -5,6 +5,7 @@
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
 #include "buffer.hpp"
+#include "texture.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -30,11 +31,16 @@ namespace dsk
     {
         globalPool =
             DskDescriptorPool::Builder(dskDevice)
-                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT)
+                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + 1)
                 .addPoolSize
                 (
                     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    DskSwapChain::MAX_FRAMES_IN_FLIGHT
+                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + 1
+                )
+                .addPoolSize
+                (
+                    VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    10
                 )
                 .build();
 
@@ -67,6 +73,10 @@ namespace dsk
             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
             .build();
         
+        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
         std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
         
         for (int i = 0; i < globalDescriptorSets.size(); i++)
@@ -77,11 +87,44 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
+        VkPhysicalDeviceProperties properties {};
+        vkGetPhysicalDeviceProperties(dskDevice.getPhysicalDevice(), &properties);
+
+        VkSamplerCreateInfo samplerInfo {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        // samplerInfo.anisotropyEnable = VK_TRUE;
+        // samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+
+        VkSampler sampler;
+        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
+
+        DskTexture texture;
+        texture.loadImage(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
+
+        VkDescriptorImageInfo imageInfo {};
+        imageInfo.sampler = sampler;
+        imageInfo.imageView = texture.imageView;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        VkDescriptorSet textureDescriptorSet;
+        DskDescriptorWriter(*textureSetLayout, *globalPool)
+            .writeImage(0, &imageInfo)
+            .build(textureDescriptorSet);
+
         DskRenderSystem dskRenderSystem
         {
             dskDevice,
             dskRenderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout()
+            globalSetLayout->getDescriptorSetLayout(),
+            textureSetLayout->getDescriptorSetLayout()
         };
 
         DskCamera camera {};
@@ -127,13 +170,18 @@ namespace dsk
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
                 int frameIndex = dskRenderer.getFrameIndex();
-                FrameInfo frameInfo
+                DskFrameInfo frameInfo
                 {
                     frameIndex,
                     frameTime,
                     commandBuffer,
                     camera,
-                    globalDescriptorSets[frameIndex]
+                    globalDescriptorSets[frameIndex],
+                    textureDescriptorSet,
+                    {
+                        globalDescriptorSets[frameIndex],
+                        textureDescriptorSet
+                    }
                 };
 
                 // update

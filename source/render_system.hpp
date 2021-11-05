@@ -20,7 +20,8 @@ namespace dsk
             (
                 DskDevice &device,
                 VkRenderPass renderPass,
-                VkDescriptorSetLayout globalSetLayout
+                VkDescriptorSetLayout globalSetLayout,
+                VkDescriptorSetLayout textureSetLayout
             );
             ~DskRenderSystem();
 
@@ -29,12 +30,16 @@ namespace dsk
 
             void renderGameObjects
             (
-                FrameInfo &frameInfo,
+                DskFrameInfo &frameInfo,
                 std::vector<DskGameObject> &gameObjects
             );
 
         private:
-            void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
+            void createPipelineLayout
+            (
+                VkDescriptorSetLayout globalSetLayout,
+                VkDescriptorSetLayout textureSetLayout
+            );
             void createPipeline(VkRenderPass renderPass);
 
             DskDevice &dskDevice;

@@ -10,10 +10,11 @@ GLM_PATH = $(DEPS)\GLM
 GLSLC_PATH = $(_DEPS)\GLSLC
 TINYOBJ_PATH = $(DEPS)\TINYOBJ
 IMGUI_PATH = $(DEPS)\IMGUI
+STB_PATH = $(DEPS)\STB
 
 SHADERS_PATH = .\resources\shaders
 
-CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)\include -I$(VULKAN_SDK_PATH)\include -I$(TINYOBJ_PATH) -I$(IMGUI_PATH)
+CFLAGS = -std=c++17 -I. -I$(GLM_PATH) -I$(GLFW_PATH)\include -I$(VULKAN_SDK_PATH)\include -I$(TINYOBJ_PATH) -I$(IMGUI_PATH) -I$(STB_PATH)
 LDFLAGS = -L$(VULKAN_SDK_PATH)\lib -L$(GLFW_PATH)\lib -lglfw3 -lvulkan-1 -lgdi32
 
 CC = g++

@@ -8,12 +8,14 @@
 
 namespace dsk
 {
-    struct FrameInfo
+    struct DskFrameInfo
     {
         int frameIndex;
         float frameTime;
         VkCommandBuffer commandBuffer;
         DskCamera &camera;
         VkDescriptorSet globalDescriptorSet;
+        VkDescriptorSet textureDescriptorSet;
+        VkDescriptorSet sets[2] = {globalDescriptorSet, textureDescriptorSet};
     };
 }

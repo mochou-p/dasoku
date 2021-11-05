@@ -5,6 +5,8 @@
 #include <cassert>
 #include <stdexcept>
 
+#include <iostream>
+
 namespace dsk
 {
     DskDescriptorSetLayout::Builder &DskDescriptorSetLayout::Builder::addBinding
@@ -164,6 +166,7 @@ namespace dsk
             ) != VK_SUCCESS
         )
         {
+            std::cout << "HERE IT IS\n" <<vkAllocateDescriptorSets(dskDevice.device(),&allocInfo,&descriptor) << "HERE IT WAS\n";
             return false;
         }
 

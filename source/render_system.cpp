@@ -21,10 +21,11 @@ namespace dsk
     (
         DskDevice &device,
         VkRenderPass renderPass,
-        VkDescriptorSetLayout globalSetLayout
+        VkDescriptorSetLayout globalSetLayout,
+        VkDescriptorSetLayout textureSetLayout
     ): dskDevice{device}
     {
-        createPipelineLayout(globalSetLayout);
+        createPipelineLayout(globalSetLayout, textureSetLayout);
         createPipeline(renderPass);
     }
 
@@ -38,14 +39,18 @@ namespace dsk
         );
     }
 
-    void DskRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
+    void DskRenderSystem::createPipelineLayout
+    (
+        VkDescriptorSetLayout globalSetLayout,
+        VkDescriptorSetLayout textureSetLayout
+    )
     {
         VkPushConstantRange pushConstantRange {};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
         pushConstantRange.size = sizeof(DskPushConstantData);
 
-        std::vector<VkDescriptorSetLayout> descriptorSetLayout {globalSetLayout};
+        std::vector<VkDescriptorSetLayout> descriptorSetLayout {globalSetLayout, textureSetLayout};
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -87,7 +92,7 @@ namespace dsk
 
     void DskRenderSystem::renderGameObjects
     (
-        FrameInfo &frameInfo,
+        DskFrameInfo &frameInfo,
         std::vector<DskGameObject> &gameObjects
     )
     {
@@ -99,8 +104,8 @@ namespace dsk
             VK_PIPELINE_BIND_POINT_GRAPHICS,
             pipelineLayout,
             0,
-            1,
-            &frameInfo.globalDescriptorSet,
+            2,
+            frameInfo.sets,
             0,
             nullptr
         );
