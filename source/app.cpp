@@ -18,7 +18,7 @@
 #include <stdexcept>
 #include <chrono>
 
-// TODO: change most things xd
+// TODO: make this impl cleaner
 
 namespace dsk
 {

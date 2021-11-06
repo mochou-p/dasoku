@@ -615,6 +615,38 @@ namespace dsk
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {width, height, 1};
 
+        VkImageMemoryBarrier toTransfer {};
+        toTransfer.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        toTransfer.srcAccessMask = 0;
+        toTransfer.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        toTransfer.image = image;
+        toTransfer.subresourceRange.aspectMask = region.imageSubresource.aspectMask;
+        toTransfer.subresourceRange.baseMipLevel = region.imageSubresource.mipLevel;
+        toTransfer.subresourceRange.levelCount = 1;
+        toTransfer.subresourceRange.baseArrayLayer = region.imageSubresource.baseArrayLayer;
+        toTransfer.subresourceRange.layerCount = region.imageSubresource.layerCount;
+
+        vkCmdPipelineBarrier
+        (
+            commandBuffer,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &toTransfer
+        );
+
+        VkBufferImageCopy copyRegion {};
+        copyRegion.imageExtent = region.imageExtent;
+        copyRegion.imageSubresource.aspectMask = region.imageSubresource.aspectMask;
+        copyRegion.imageSubresource.mipLevel = region.imageSubresource.mipLevel;
+        copyRegion.imageSubresource.baseArrayLayer = region.imageSubresource.baseArrayLayer;
+        copyRegion.imageSubresource.layerCount = 1;
+
         vkCmdCopyBufferToImage
         (
             commandBuffer,
@@ -622,8 +654,29 @@ namespace dsk
             image,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1,
-            &region
+            &copyRegion
         );
+
+        VkImageMemoryBarrier toReadable = toTransfer;
+        toReadable.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        toReadable.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        toReadable.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        toReadable.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier
+        (
+            commandBuffer,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &toReadable
+        );
+
         endSingleTimeCommands(commandBuffer);
     }
 

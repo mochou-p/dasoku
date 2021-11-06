@@ -9,5 +9,5 @@
 - [GLM](https://github.com/g-truc/glm "https://github.com/g-truc/glm")
 - [GLSLC](https://github.com/KhronosGroup/glslang "https://github.com/KhronosGroup/glslang")
 - [ImGui](https://github.com/ocornut/imgui "https://github.com/ocornut/imgui")
-- [STB](https://github.com/nothings/stb "https://github.com/nothings/stb")
+- [stb](https://github.com/nothings/stb "https://github.com/nothings/stb")
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader "https://github.com/tinyobjloader/tinyobjloader")
