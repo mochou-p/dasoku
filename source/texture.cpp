@@ -7,16 +7,6 @@
 
 namespace dsk
 {
-    void DskTexture::createCommandBuffer(DskDevice &dskDevice)
-    {
-        commandBuffer = dskDevice.beginSingleTimeCommands();
-    }
-
-    void DskTexture::freeCommandBuffer(DskDevice &dskDevice)
-    {
-        dskDevice.endSingleTimeCommands(commandBuffer);
-    }
-
     void DskTexture::createBuffer(DskDevice &dskDevice)
     {
         VkDeviceSize texSize = texWidth * texHeight * 4;
@@ -90,5 +80,11 @@ namespace dsk
         imageViewInfo.subresourceRange.layerCount = 1;
 
         vkCreateImageView(dskDevice.device(), &imageViewInfo, nullptr, &imageView);
+    }
+
+    void DskTexture::cleanup(DskDevice &dskDevice)
+    {
+        vkDestroyImage(dskDevice.device(), image, nullptr);
+        vkFreeMemory(dskDevice.device(), imageMemory, nullptr);
     }
 }

@@ -13,14 +13,13 @@ namespace dsk
     class DskTexture
     {
         public:
-            void createCommandBuffer(DskDevice &dskDevice);
-            void freeCommandBuffer(DskDevice &dskDevice);
-
             void createBuffer(DskDevice &dskDevice);
 
             void loadImage(const std::string &filepath, DskDevice &DskDevice);
 
             VkImageView imageView;
+
+            void cleanup(DskDevice &dskDevice);
 
         private:
             int texWidth;

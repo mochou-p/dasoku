@@ -45,6 +45,12 @@ namespace dsk
 
             VkDescriptorPool imguiPool;
 
+            void cleanup
+            (
+                VkSampler sampler,
+                VkDescriptorImageInfo *imageInfos
+            );
+
             DskWindow dskWindow {WIDTH, HEIGHT, "Dasoku"};
             DskDevice dskDevice {dskWindow};
             DskRenderer dskRenderer {dskWindow, dskDevice};

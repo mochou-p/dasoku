@@ -18,6 +18,8 @@
 #include <stdexcept>
 #include <chrono>
 
+// TODO: change most things xd
+
 namespace dsk
 {
     struct GlobalUbo
@@ -214,11 +216,7 @@ namespace dsk
             gameObjects[2].transform3d.rotation.y += glm::radians(0.2f);
         }
 
-        vkDeviceWaitIdle(dskDevice.device());
-
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
+        cleanup(sampler, imageInfos);
     }
 
     void App::loadGameObjects(DskDescriptorPool &globalPool)
@@ -376,5 +374,29 @@ namespace dsk
     void App::renderImGui(VkCommandBuffer commandBuffer)
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+    }
+
+    void App::cleanup
+    (
+        VkSampler sampler,
+        VkDescriptorImageInfo *imageInfos
+    )
+    {
+        vkDeviceWaitIdle(dskDevice.device());
+
+        ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+
+        vkDestroySampler(dskDevice.device(), sampler, nullptr);
+        for (int i = 0; i < textureCount; i++)
+        {
+            vkDestroyImageView(dskDevice.device(), imageInfos[i].imageView, nullptr);
+        }
+
+        for (int i = 0; i < textureCount; i++)
+        {
+            textures[i].cleanup(dskDevice);
+        }
     }
 }
