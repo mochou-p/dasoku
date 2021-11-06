@@ -620,6 +620,8 @@ namespace dsk
         toTransfer.srcAccessMask = 0;
         toTransfer.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         toTransfer.image = image;
+        toTransfer.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        toTransfer.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         toTransfer.subresourceRange.aspectMask = region.imageSubresource.aspectMask;
         toTransfer.subresourceRange.baseMipLevel = region.imageSubresource.mipLevel;
         toTransfer.subresourceRange.levelCount = 1;
