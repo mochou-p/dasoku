@@ -5,7 +5,6 @@
 #include "camera.hpp"
 #include "keyboard_movement_controller.hpp"
 #include "buffer.hpp"
-#include "texture.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
@@ -83,16 +82,62 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
-        auto _textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+        VkDescriptorImageInfo imageInfos[textureCount];
+
+        for (int i = 0; i < textureCount; i++)
+        {
+            imageInfos[i].sampler = nullptr;
+            imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfos[i].imageView = textures[i].imageView;
+        }
+
+        VkSamplerCreateInfo samplerInfo {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+
+        VkSampler sampler;
+        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
+
+        VkDescriptorImageInfo samplerImageInfo {};
+        samplerImageInfo.sampler = sampler;
+        samplerImageInfo.imageView = nullptr;
+        samplerImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding
+            (
+                0,
+                VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                textureCount
+            )
+            .addBinding
+            (
+                1,
+                VK_DESCRIPTOR_TYPE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT
+            )
             .build();
+        
+        VkDescriptorSet textureDescriptorSet;
+        DskDescriptorWriter(*textureSetLayout, *globalPool)
+            .writeImage(0, imageInfos, textureCount)
+            .writeImage(1, &samplerImageInfo, 1)
+            .build(textureDescriptorSet);
 
         DskRenderSystem dskRenderSystem
         {
             dskDevice,
             dskRenderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout(),
-            _textureSetLayout->getDescriptorSetLayout()
+            textureSetLayout->getDescriptorSetLayout()
         };
 
         DskCamera camera {};
@@ -144,7 +189,12 @@ namespace dsk
                     frameTime,
                     commandBuffer,
                     camera,
-                    globalDescriptorSets[frameIndex]
+                    globalDescriptorSets[frameIndex],
+                    textureDescriptorSet,
+                    {
+                        globalDescriptorSets[frameIndex],
+                        textureDescriptorSet
+                    }
                 };
 
                 // update
@@ -183,12 +233,8 @@ namespace dsk
         cube.model = dskModel;
         cube.transform3d.translation = {0.0f, 0.3f, 2.5f};
         cube.transform3d.scale = {10.0f, 0.2f, 10.0f};
-        cube.textureDescriptorSet = makeTextureDescriptorSet
-        (
-            ".\\resources\\textures\\Floor.png",
-            dskDevice,
-            &globalPool
-        );
+        cube.textureIndex = textureCount;
+        textures[textureCount] = makeTexture(".\\resources\\textures\\Floor.png", dskDevice);
         gameObjects.push_back(std::move(cube));
 
         dskModel =
@@ -197,12 +243,8 @@ namespace dsk
         vase.model = dskModel;
         vase.transform3d.translation = {0.3f, 0.1f, 2.5f};
         vase.transform3d.scale = glm::vec3(1.0f);
-        vase.textureDescriptorSet = makeTextureDescriptorSet
-        (
-            ".\\resources\\textures\\Paper.png",
-            dskDevice,
-            &globalPool
-        );
+        vase.textureIndex = textureCount;
+        textures[textureCount] = makeTexture(".\\resources\\textures\\Paper.png", dskDevice);
         gameObjects.push_back(std::move(vase));
 
         dskModel =
@@ -211,54 +253,23 @@ namespace dsk
         catgirl.model = dskModel;
         catgirl.transform3d.translation = {-0.3f, 0.02f, 2.5f};
         catgirl.transform3d.scale = {0.3f, -0.3f, 0.3f};
-        catgirl.textureDescriptorSet = makeTextureDescriptorSet
-        (
-            ".\\resources\\models\\neco-arc\\BaseColor.png",
-            dskDevice,
-            &globalPool
-        );
+        catgirl.textureIndex = textureCount;
+        textures[textureCount] = makeTexture(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
         gameObjects.push_back(std::move(catgirl));
     }
 
-    VkDescriptorSet App::makeTextureDescriptorSet
+    DskTexture App::makeTexture
     (
         std::string filename,
-        DskDevice &dskDevice,
-        DskDescriptorPool *globalPool
+        DskDevice &dskDevice
     )
     {
-        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-            .build();
-
-        VkSamplerCreateInfo samplerInfo {};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-
-        VkSampler sampler;
-        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
-
         DskTexture texture;
         texture.loadImage(filename, dskDevice);
 
-        VkDescriptorImageInfo imageInfo {};
-        imageInfo.sampler = sampler;
-        imageInfo.imageView = texture.imageView;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        textureCount++;
 
-        VkDescriptorSet textureDescriptorSet;
-        DskDescriptorWriter(*textureSetLayout, *globalPool)
-            .writeImage(0, &imageInfo)
-            .build(textureDescriptorSet);
-        
-        return textureDescriptorSet;
+        return texture;
     }
 
     void App::initImGui()

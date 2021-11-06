@@ -15,6 +15,7 @@ namespace dsk
     {
         glm::mat4 modelMatrix {1.0f};
         glm::mat4 normalMatrix {1.0f};
+        int textureIndex;
     };
 
     DskRenderSystem::DskRenderSystem
@@ -98,40 +99,24 @@ namespace dsk
     {
         dskPipeline->bind(frameInfo.commandBuffer);
 
-        // vkCmdBindDescriptorSets
-        // (
-        //     frameInfo.commandBuffer,
-        //     VK_PIPELINE_BIND_POINT_GRAPHICS,
-        //     pipelineLayout,
-        //     0,
-        //     2,
-        //     frameInfo.sets,
-        //     0,
-        //     nullptr
-        // );
+        vkCmdBindDescriptorSets
+        (
+            frameInfo.commandBuffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout,
+            0,
+            2,
+            frameInfo.sets,
+            0,
+            nullptr
+        );
 
         for (auto &obj : gameObjects)
         {
-            VkDescriptorSet descriptorSets[2] =
-                {
-                    frameInfo.globalDescriptorSet,
-                    obj.textureDescriptorSet
-                };
-            vkCmdBindDescriptorSets
-            (
-                frameInfo.commandBuffer,
-                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                pipelineLayout,
-                0,
-                2,
-                descriptorSets,
-                0,
-                nullptr
-            );
-
             DskPushConstantData push {};
             push.modelMatrix = obj.transform3d.mat4();
             push.normalMatrix = obj.transform3d.normalMatrix();
+            push.textureIndex = obj.textureIndex;
 
             vkCmdPushConstants
             (

@@ -7,6 +7,7 @@
 #include "game_object.hpp"
 #include "renderer.hpp"
 #include "descriptors.hpp"
+#include "texture.hpp"
 
 #include <memory>
 #include <vector>
@@ -29,16 +30,18 @@ namespace dsk
 
         private:
             void loadGameObjects(DskDescriptorPool &globalPool);
-            VkDescriptorSet makeTextureDescriptorSet
+            DskTexture makeTexture
             (
                 std::string filename,
-                DskDevice &dskDevice,
-                DskDescriptorPool *globalPool
+                DskDevice &dskDevice
             );
 
             void initImGui();
             void setupImGui(glm::vec3 viewerPos);
             void renderImGui(VkCommandBuffer commandBuffer);
+
+            DskTexture textures[64];
+            int textureCount = 0;
 
             VkDescriptorPool imguiPool;
 

@@ -103,7 +103,7 @@ namespace dsk
         public:
             DskDescriptorWriter(DskDescriptorSetLayout &setLayout, DskDescriptorPool &pool);
             DskDescriptorWriter &writeBuffer(uint32_t binding, VkDescriptorBufferInfo *bufferInfo);
-            DskDescriptorWriter &writeImage(uint32_t binding, VkDescriptorImageInfo *imageInfo);
+            DskDescriptorWriter &writeImage(uint32_t binding, VkDescriptorImageInfo *imageInfo, int descriptorCount);
 
             bool build(VkDescriptorSet &set);
             void overwrite(VkDescriptorSet &set);
