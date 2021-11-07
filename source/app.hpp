@@ -30,11 +30,6 @@ namespace dsk
 
         private:
             void loadGameObjects(DskDescriptorPool &globalPool);
-            DskTexture makeTexture
-            (
-                std::string filename,
-                DskDevice &dskDevice
-            );
 
             void initImGui();
             void setupImGui(glm::vec3 viewerPos);
@@ -54,7 +49,6 @@ namespace dsk
             DskDevice dskDevice {dskWindow};
             DskRenderer dskRenderer {dskWindow, dskDevice};
 
-            // order of decls matters
             std::unique_ptr<DskDescriptorPool> globalPool {};
             std::vector<DskGameObject> gameObjects;
     };

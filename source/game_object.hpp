@@ -3,6 +3,7 @@
 #pragma once
 
 #include "model.hpp"
+#include "texture.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -15,7 +16,7 @@ namespace dsk
         struct Transform3dComponent
         {
             glm::vec3 translation {};
-            glm::vec3 scale {1.0f, 1.0f, 1.0f};
+            glm::vec3 scale {1.0f};
             glm::vec3 rotation {};
 
             glm::mat4 mat4();
@@ -32,12 +33,35 @@ namespace dsk
                 return DskGameObject {currentId++};
             }
 
-            DskGameObject(const DskGameObject &) = delete;
-            DskGameObject &operator=(const DskGameObject &) = delete;
-            DskGameObject(DskGameObject &&) = default;
-            DskGameObject &operator=(DskGameObject &&) = default;
-
             id_t getId() { return id; }
+
+            DskGameObject &setModel
+            (
+                DskDevice &dskDevice,
+                std::string filename
+            );
+            DskGameObject &setTexture
+            (
+                DskDevice &dskDevice,
+                std::string filename,
+                DskTexture textures[]
+            );
+            DskGameObject &setTranslation(glm::vec3 translation);
+            DskGameObject &setScale(glm::vec3 scale);
+            DskGameObject &setRotation(glm::vec3 rotation);
+            DskGameObject &build
+            (
+                std::vector<DskGameObject> *gameObjects
+            );
+
+            glm::vec3 getTranslation()
+            { return transform3d.translation; }
+
+            glm::vec3 getScale()
+            { return transform3d.scale; }
+
+            glm::vec3 getRotation()
+            { return transform3d.rotation; }
 
             std::shared_ptr<DskModel> model {};
             glm::vec3 color {};

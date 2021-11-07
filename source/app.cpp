@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <chrono>
 
-// TODO: make this impl cleaner
-
 namespace dsk
 {
     struct GlobalUbo
@@ -214,7 +212,12 @@ namespace dsk
                 dskRenderer.endFrame();
             }
 
-            gameObjects[2].transform3d.rotation.y += glm::radians(0.2f);
+            gameObjects[2].setRotation
+            ({
+                0.0f,
+                gameObjects[2].getRotation().y + glm::radians(0.2f),
+                0.0f
+            });
         }
 
         cleanup(sampler, imageInfos);
@@ -222,65 +225,43 @@ namespace dsk
 
     void App::loadGameObjects(DskDescriptorPool &globalPool)
     {
-        std::shared_ptr<DskModel> dskModel;
+        auto cube = DskGameObject::createGameObject()
+            .setModel(dskDevice, ".\\resources\\models\\colored_cube.obj")
+            .setTexture(dskDevice, ".\\resources\\textures\\Floor.png", textures)
+            .setTranslation({0.0f, 0.3f, 2.5f})
+            .setScale({10.0f, 0.2f, 10.0f})
+            .build(&gameObjects);
 
-        // TODO: simplify this
-        dskModel =
-            DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\colored_cube.obj");
+        auto vase = DskGameObject::createGameObject()
+            .setModel(dskDevice, ".\\resources\\models\\smooth_vase.obj")
+            .setTexture(dskDevice, ".\\resources\\textures\\Paper.png", textures)
+            .setTranslation({0.3f, 0.1f, 2.5f})
+            .setScale(glm::vec3(1.0f))
+            .build(&gameObjects);
         
-        auto cube = DskGameObject::createGameObject();
-        cube.model = dskModel;
-        cube.transform3d.translation = {0.0f, 0.3f, 2.5f};
-        cube.transform3d.scale = {10.0f, 0.2f, 10.0f};
-        textures[cube.getId()] = makeTexture(".\\resources\\textures\\Floor.png", dskDevice);
-        gameObjects.push_back(std::move(cube));
-
-        dskModel =
-            DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\smooth_vase.obj");
-        auto vase = DskGameObject::createGameObject();
-        vase.model = dskModel;
-        vase.transform3d.translation = {0.3f, 0.1f, 2.5f};
-        vase.transform3d.scale = glm::vec3(1.0f);
-        textures[vase.getId()] = makeTexture(".\\resources\\textures\\Paper.png", dskDevice);
-        gameObjects.push_back(std::move(vase));
-
-        dskModel =
-            DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\neco-arc\\PBR - Metallic Roughness.obj");
-        auto catgirl = DskGameObject::createGameObject();
-        catgirl.model = dskModel;
-        catgirl.transform3d.translation = {-0.3f, 0.021f, 2.5f};
-        catgirl.transform3d.scale = {0.3f, -0.3f, 0.3f};
-        textures[catgirl.getId()] = makeTexture(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
-        gameObjects.push_back(std::move(catgirl));
-    }
-
-    DskTexture App::makeTexture
-    (
-        std::string filename,
-        DskDevice &dskDevice
-    )
-    {
-        DskTexture texture;
-        texture.loadImage(filename, dskDevice);
-
-        return texture;
+        auto catgirl = DskGameObject::createGameObject()
+            .setModel(dskDevice, ".\\resources\\models\\neco-arc\\PBR - Metallic Roughness.obj")
+            .setTexture(dskDevice, ".\\resources\\models\\neco-arc\\BaseColor.png", textures)
+            .setTranslation({-0.3f, 0.1f, 2.5f})
+            .setScale({0.3f, -0.3f, 0.3f})
+            .build(&gameObjects);
     }
 
     void App::initImGui()
     {
         VkDescriptorPoolSize pool_sizes[] =
             {
-                { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+                {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
+                {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+                {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
+                {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
+                {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
+                {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
+                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
+                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
+                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+                {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
             };
 
         VkDescriptorPoolCreateInfo pool_info {};
