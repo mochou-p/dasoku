@@ -1,5 +1,5 @@
-# Dasoku
-![Dasoku](https://i.imgur.com/rfRWlsD.png "Dasoku")
+# Dasoku Engine
+![Dasoku Engine](https://i.imgur.com/rfRWlsD.png "Dasoku Engine")
 
 ## Dependencies
 #### Need to install

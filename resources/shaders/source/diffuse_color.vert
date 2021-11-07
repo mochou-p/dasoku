@@ -23,7 +23,8 @@ layout (set = 0, binding = 0) uniform GlobalUbo
 layout (push_constant) uniform Push
 {
     mat4 modelMatrix;
-    mat4 normalMatrix;
+    mat3 normalMatrix;
+    int textureIndex;
 } push;
 
 const float AMBIENT = 0.02f;
@@ -32,7 +33,7 @@ void main()
 {
     gl_Position = ubo.projectionViewMatrix * push.modelMatrix * vec4(position, 1.0);
 
-    vec3 normalWorldSpace = normalize(mat3(push.normalMatrix) * normal);
+    vec3 normalWorldSpace = normalize(push.normalMatrix * normal);
 
     float lightIntensity = AMBIENT + max(dot(normalWorldSpace, ubo.directionToLight), 0);
 

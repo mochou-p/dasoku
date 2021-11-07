@@ -84,9 +84,10 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
-        VkDescriptorImageInfo imageInfos[textureCount];
+        
+        VkDescriptorImageInfo imageInfos[gameObjects.size()];
 
-        for (int i = 0; i < textureCount; i++)
+        for (int i = 0; i < gameObjects.size(); i++)
         {
             imageInfos[i].sampler = nullptr;
             imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -118,7 +119,7 @@ namespace dsk
                 0,
                 VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
                 VK_SHADER_STAGE_FRAGMENT_BIT,
-                textureCount
+                gameObjects.size()
             )
             .addBinding
             (
@@ -130,7 +131,7 @@ namespace dsk
         
         VkDescriptorSet textureDescriptorSet;
         DskDescriptorWriter(*textureSetLayout, *globalPool)
-            .writeImage(0, imageInfos, textureCount)
+            .writeImage(0, imageInfos, gameObjects.size())
             .writeImage(1, &samplerImageInfo, 1)
             .build(textureDescriptorSet);
 
@@ -231,8 +232,7 @@ namespace dsk
         cube.model = dskModel;
         cube.transform3d.translation = {0.0f, 0.3f, 2.5f};
         cube.transform3d.scale = {10.0f, 0.2f, 10.0f};
-        cube.textureIndex = textureCount;
-        textures[textureCount] = makeTexture(".\\resources\\textures\\Floor.png", dskDevice);
+        textures[cube.getId()] = makeTexture(".\\resources\\textures\\Floor.png", dskDevice);
         gameObjects.push_back(std::move(cube));
 
         dskModel =
@@ -241,18 +241,16 @@ namespace dsk
         vase.model = dskModel;
         vase.transform3d.translation = {0.3f, 0.1f, 2.5f};
         vase.transform3d.scale = glm::vec3(1.0f);
-        vase.textureIndex = textureCount;
-        textures[textureCount] = makeTexture(".\\resources\\textures\\Paper.png", dskDevice);
+        textures[vase.getId()] = makeTexture(".\\resources\\textures\\Paper.png", dskDevice);
         gameObjects.push_back(std::move(vase));
 
         dskModel =
             DskModel::createModelFromFile(dskDevice, ".\\resources\\models\\neco-arc\\PBR - Metallic Roughness.obj");
         auto catgirl = DskGameObject::createGameObject();
         catgirl.model = dskModel;
-        catgirl.transform3d.translation = {-0.3f, 0.02f, 2.5f};
+        catgirl.transform3d.translation = {-0.3f, 0.021f, 2.5f};
         catgirl.transform3d.scale = {0.3f, -0.3f, 0.3f};
-        catgirl.textureIndex = textureCount;
-        textures[textureCount] = makeTexture(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
+        textures[catgirl.getId()] = makeTexture(".\\resources\\models\\neco-arc\\BaseColor.png", dskDevice);
         gameObjects.push_back(std::move(catgirl));
     }
 
@@ -264,8 +262,6 @@ namespace dsk
     {
         DskTexture texture;
         texture.loadImage(filename, dskDevice);
-
-        textureCount++;
 
         return texture;
     }
@@ -389,12 +385,12 @@ namespace dsk
         ImGui::DestroyContext();
 
         vkDestroySampler(dskDevice.device(), sampler, nullptr);
-        for (int i = 0; i < textureCount; i++)
+        for (int i = 0; i < gameObjects.size(); i++)
         {
             vkDestroyImageView(dskDevice.device(), imageInfos[i].imageView, nullptr);
         }
 
-        for (int i = 0; i < textureCount; i++)
+        for (int i = 0; i < gameObjects.size(); i++)
         {
             textures[i].cleanup(dskDevice);
         }

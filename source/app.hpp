@@ -41,7 +41,6 @@ namespace dsk
             void renderImGui(VkCommandBuffer commandBuffer);
 
             DskTexture textures[64];
-            int textureCount = 0;
 
             VkDescriptorPool imguiPool;
 
