@@ -35,12 +35,12 @@ namespace dsk
             int lastActiveObj = -1;
 
             void initImGui();
-            void setupImGui(glm::vec3 viewerPos);
+            void setupImGui();
             void renderImGui(VkCommandBuffer commandBuffer);
 
-            DskTexture textures[64];
-
             VkDescriptorPool imguiPool;
+
+            DskTexture textures[64];
 
             void cleanup
             (

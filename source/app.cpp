@@ -46,10 +46,7 @@ namespace dsk
         loadGameObjects(*globalPool);
     }
 
-    App::~App()
-    {
-        vkDestroyDescriptorPool(dskDevice.device(), imguiPool, nullptr);
-    }
+    App::~App() {}
 
     void App::run()
     {
@@ -179,7 +176,7 @@ namespace dsk
             float aspect = dskRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 50.0f);
 
-            setupImGui(viewerObject.transform.translation);
+            setupImGui();
 
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
@@ -301,19 +298,19 @@ namespace dsk
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    void App::setupImGui(glm::vec3 viewerPos)
+    void App::setupImGui()
     {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
 
         ImGui::NewFrame();
 
-        ImGui::PushStyleColor(ImGuiCol_TitleBg,       {0.0f, 0.0f, 0.0f, 1.00f});
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, {0.0f, 0.0f, 0.0f, 1.00f});
-        ImGui::PushStyleColor(ImGuiCol_WindowBg,      {0.0f, 0.0f, 0.0f, 0.70f});
-        ImGui::PushStyleColor(ImGuiCol_Border,        {0.0f, 0.0f, 0.0f, 0.00f});
-        ImGui::PushStyleColor(ImGuiCol_Button,        {0.0f, 0.0f, 0.0f, 0.00f});
-        ImGui::PushStyleColor(ImGuiCol_TabActive,     {0.0f, 0.0f, 0.0f, 1.00f});
+        ImGui::PushStyleColor(ImGuiCol_TitleBg,       {0.0f, 0.0f, 0.0f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, {0.0f, 0.0f, 0.0f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_WindowBg,      {0.0f, 0.0f, 0.0f, 0.7f});
+        ImGui::PushStyleColor(ImGuiCol_Border,        {0.0f, 0.0f, 0.0f, 0.0f});
+        ImGui::PushStyleColor(ImGuiCol_Button,        {0.0f, 0.0f, 0.0f, 0.0f});
+        ImGui::PushStyleColor(ImGuiCol_TabActive,     {0.0f, 0.0f, 0.0f, 1.0f});
 
         ImGuiWindowFlags windowFlags =
             ImGuiWindowFlags_NoCollapse |
@@ -381,15 +378,15 @@ namespace dsk
                 ImGui::Dummy(ImVec2(0.0f, 10.0f));
                 ImGui::Text("translation");
                 translation.y *= -1;
-                ImGui::InputFloat("x",   &translation.x, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y",   &translation.y, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z",   &translation.z, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("x", &translation.x, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("y", &translation.y, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("z", &translation.z, 0.01f, 0.2f, "%.4f");
                 translation.y *= -1;
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("scale");
-                ImGui::InputFloat("x ",  &scale.x,       0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y ",  &scale.y,       0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z ",  &scale.z,       0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("x ", &scale.x, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("y ", &scale.y, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("z ", &scale.z, 0.01f, 0.2f, "%.4f");
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("rotation");
                 rotation.x = glm::degrees(rotation.x);
@@ -401,9 +398,9 @@ namespace dsk
                 if (rotation.x >= 360) { rotation.x = fmod(rotation.x, 360); }
                 if (rotation.y >= 360) { rotation.y = fmod(rotation.y, 360); }
                 if (rotation.z >= 360) { rotation.z = fmod(rotation.z, 360); }
-                ImGui::InputFloat("x  ", &rotation.x,    1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("y  ", &rotation.y,    1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("z  ", &rotation.z,    1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("x  ", &rotation.x, 1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("y  ", &rotation.y, 1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("z  ", &rotation.z, 1.0f, 10.0f, "%.0f");
                 rotation.x = glm::radians(rotation.x);
                 rotation.y = glm::radians(rotation.y);
                 rotation.z = glm::radians(rotation.z);
@@ -432,11 +429,14 @@ namespace dsk
     {
         vkDeviceWaitIdle(dskDevice.device());
 
+        vkDestroyDescriptorPool(dskDevice.device(), imguiPool, nullptr);
+
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
 
         vkDestroySampler(dskDevice.device(), sampler, nullptr);
+
         for (int i = 0; i < gameObjects.size(); i++)
         {
             vkDestroyImageView(dskDevice.device(), imageInfos[i].imageView, nullptr);
