@@ -115,8 +115,8 @@ namespace dsk
         for (auto &obj : gameObjects)
         {
             DskPushConstantData push {};
-            push.modelMatrix = obj.transform3d.mat4();
-            push.normalMatrix = obj.transform3d.normalMatrix();
+            push.modelMatrix = obj.transform.mat4();
+            push.normalMatrix = obj.transform.normalMatrix();
             push.textureIndex = obj.getId();
 
             vkCmdPushConstants

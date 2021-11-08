@@ -144,7 +144,7 @@ namespace dsk
         DskCamera camera {};
         camera.setViewTarget
         (
-            glm::vec3(-1.0f, -2.0f, 2.0f),
+            glm::vec3(-1.0f, -2.5f, 2.0f),
             glm::vec3(0.0f, 0.0f, 2.5f)
         );
 
@@ -172,14 +172,14 @@ namespace dsk
             );
             camera.setViewYXZ
             (
-                viewerObject.transform3d.translation,
-                viewerObject.transform3d.rotation
+                viewerObject.transform.translation,
+                viewerObject.transform.rotation
             );
 
             float aspect = dskRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 50.0f);
 
-            setupImGui(viewerObject.transform3d.translation);
+            setupImGui(viewerObject.transform.translation);
 
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
@@ -198,26 +198,17 @@ namespace dsk
                     }
                 };
 
-                // update
                 GlobalUbo ubo {};
                 ubo.projectionView = camera.getProjection() * camera.getView();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
-                // render
                 dskRenderer.beginSwapChainRenderPass(commandBuffer);
                 dskRenderSystem.renderGameObjects(frameInfo, gameObjects);
                 renderImGui(commandBuffer);
                 dskRenderer.endSwapChainRenderPass(commandBuffer);
                 dskRenderer.endFrame();
             }
-
-            gameObjects[2].setRotation
-            ({
-                0.0f,
-                gameObjects[2].getRotation().y + glm::radians(0.2f),
-                0.0f
-            });
         }
 
         cleanup(sampler, imageInfos);
@@ -225,21 +216,29 @@ namespace dsk
 
     void App::loadGameObjects(DskDescriptorPool &globalPool)
     {
+        // will be setting a default texture
+        // instead of a color for now, make
+        // sure to change cleanup loops when
+        // changing this
+
         auto cube = DskGameObject::createGameObject()
+            .setTag("Cube")
             .setModel(dskDevice, ".\\resources\\models\\colored_cube.obj")
-            .setTexture(dskDevice, ".\\resources\\textures\\Floor.png", textures)
+            .setTexture(dskDevice, ".\\resources\\textures\\default.png", textures)
             .setTranslation({0.0f, 0.3f, 2.5f})
             .setScale({10.0f, 0.2f, 10.0f})
             .build(&gameObjects);
 
         auto vase = DskGameObject::createGameObject()
+            .setTag("Vase")
             .setModel(dskDevice, ".\\resources\\models\\smooth_vase.obj")
-            .setTexture(dskDevice, ".\\resources\\textures\\Paper.png", textures)
+            .setTexture(dskDevice, ".\\resources\\textures\\default.png", textures)
             .setTranslation({0.3f, 0.1f, 2.5f})
             .setScale(glm::vec3(1.0f))
             .build(&gameObjects);
         
         auto catgirl = DskGameObject::createGameObject()
+            .setTag("Catgirl")
             .setModel(dskDevice, ".\\resources\\models\\neco-arc\\PBR - Metallic Roughness.obj")
             .setTexture(dskDevice, ".\\resources\\models\\neco-arc\\BaseColor.png", textures)
             .setTranslation({-0.3f, 0.1f, 2.5f})
@@ -308,18 +307,24 @@ namespace dsk
 
         ImGui::NewFrame();
 
-        ImGui::PushStyleColor(ImGuiCol_TitleBg,  {0.0f, 0.0f, 0.0f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.0f, 0.0f, 0.0f, 0.8f});
-        ImGui::PushStyleColor(ImGuiCol_Border,   {0.0f, 0.0f, 0.0f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_TitleBg,       {0.0f, 0.0f, 0.0f, 1.00f});
+        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, {0.0f, 0.0f, 0.0f, 1.00f});
+        ImGui::PushStyleColor(ImGuiCol_WindowBg,      {0.0f, 0.0f, 0.0f, 0.70f});
+        ImGui::PushStyleColor(ImGuiCol_Border,        {0.0f, 0.0f, 0.0f, 0.00f});
+        ImGui::PushStyleColor(ImGuiCol_Button,        {0.0f, 0.0f, 0.0f, 0.00f});
+        ImGui::PushStyleColor(ImGuiCol_TabActive,     {0.0f, 0.0f, 0.0f, 1.00f});
+
+        ImGuiWindowFlags windowFlags =
+            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoFocusOnAppearing;
 
         ImGui::Begin
         (
             "Frametime",
             nullptr,
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoFocusOnAppearing
+            windowFlags
         );
             ImGui::Text
             (
@@ -331,19 +336,72 @@ namespace dsk
 
         ImGui::Begin
         (
-            "Viewer",
+            "Hierarchy",
             nullptr,
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoFocusOnAppearing
+            windowFlags
         );
-            ImGui::Text("x: %.4f", viewerPos.x);
-            ImGui::Text("y: %.4f", -viewerPos.y);
-            ImGui::Text("z: %.4f", viewerPos.z);
+            for (auto &obj : gameObjects)
+            {
+                auto active = obj.getId() == activeObj;
+
+                if (active)
+                { ImGui::PushStyleColor(ImGuiCol_Button, {0.3f, 0.3f, 0.3f, 0.3f}); }
+                if (ImGui::Button(obj.getTag().c_str())) { activeObj = obj.getId(); }
+                if (active) { ImGui::PopStyleColor(1); }
+            }
         ImGui::End();
 
-        ImGui::PopStyleColor(3);
+        if (activeObj > -1)
+        {
+            auto obj = &gameObjects[activeObj];
+
+            static glm::vec3 translation {obj->transform.translation};
+            static glm::vec3 scale       {obj->transform.scale      };
+            static glm::vec3 rotation    {obj->transform.rotation   };
+
+            if (activeObj != lastActiveObj)
+            {
+                translation = {obj->transform.translation};
+                scale       = {obj->transform.scale      };
+                rotation    = {obj->transform.rotation   };
+
+                lastActiveObj = activeObj;
+            }
+
+            ImGui::Begin
+            (
+                "Inspector",
+                nullptr,
+                windowFlags
+            );
+                ImGui::Text("tag: %s", obj->getTag().c_str());
+                ImGui::Dummy(ImVec2(0.0f, 20.0f));
+                ImGui::Text("transform");
+                ImGui::Dummy(ImVec2(0.0f, 10.0f));
+                ImGui::Text("translation:");
+                translation.y *= -1;
+                ImGui::SliderFloat("x",   &translation.x,  -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("y",   &translation.y,  -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("z",   &translation.z,  -5.0f, 5.0f, "%.4f");
+                translation.y *= -1;
+                ImGui::Dummy(ImVec2(0.0f, 5.0f));
+                ImGui::Text("scale");
+                ImGui::SliderFloat("x ",  &scale.x,        -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("y ",  &scale.y,        -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("z ",  &scale.z,        -5.0f, 5.0f, "%.4f");
+                ImGui::Dummy(ImVec2(0.0f, 5.0f));
+                ImGui::Text("rotation");
+                ImGui::SliderFloat("x  ", &rotation.x,     -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("y  ", &rotation.y,     -5.0f, 5.0f, "%.4f");
+                ImGui::SliderFloat("z  ", &rotation.z,     -5.0f, 5.0f, "%.4f");
+            ImGui::End();
+
+            if (obj->transform.translation != translation) { obj->setTranslation(translation); }
+            if (obj->transform.scale       != scale      ) { obj->setScale(scale);             }
+            if (obj->transform.rotation    != rotation   ) { obj->setRotation(rotation);       }
+        }
+
+        ImGui::PopStyleColor(6);
 
         ImGui::Render();
     }

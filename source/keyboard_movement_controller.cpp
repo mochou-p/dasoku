@@ -20,14 +20,14 @@ namespace dsk
 
         if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
         {
-            gameObjects.transform3d.rotation += turnSpeed * dt * glm::normalize(rotate);
+            gameObjects.transform.rotation += turnSpeed * dt * glm::normalize(rotate);
         }
 
         // limit pitch (x)
-        gameObjects.transform3d.rotation.x = glm::clamp(gameObjects.transform3d.rotation.x, -1.5f, 1.5f);
-        gameObjects.transform3d.rotation.y = glm::mod(gameObjects.transform3d.rotation.y, glm::two_pi<float>());
+        gameObjects.transform.rotation.x = glm::clamp(gameObjects.transform.rotation.x, -1.5f, 1.5f);
+        gameObjects.transform.rotation.y = glm::mod(gameObjects.transform.rotation.y, glm::two_pi<float>());
 
-        float yaw = gameObjects.transform3d.rotation.y;
+        float yaw = gameObjects.transform.rotation.y;
         const glm::vec3 forwardDir {sin(yaw), 0.0f, cos(yaw)};
         const glm::vec3 rightDir {forwardDir.z, 0.0f, -forwardDir.x};
         const glm::vec3 upDir {0.0f, -1.0f, 0.0f};
@@ -42,7 +42,7 @@ namespace dsk
 
         if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon())
         {
-            gameObjects.transform3d.translation += moveSpeed * dt * glm::normalize(moveDir);
+            gameObjects.transform.translation += moveSpeed * dt * glm::normalize(moveDir);
         }
     }
 }

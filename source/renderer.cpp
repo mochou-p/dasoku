@@ -175,7 +175,7 @@ namespace dsk
         renderPassInfo.renderArea.extent = dskSwapChain->getSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues {};
-        clearValues[0].color = {0.05f, 0.05f, 0.05f, 1.0f}; // background
+        clearValues[0].color = {0.01255f, 0.01373f, 0.01765f}; // background
         clearValues[1].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();

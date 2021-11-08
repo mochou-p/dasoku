@@ -46,6 +46,7 @@ namespace dsk
                 std::string filename,
                 DskTexture textures[]
             );
+            DskGameObject &setTag(std::string name);
             DskGameObject &setTranslation(glm::vec3 translation);
             DskGameObject &setScale(glm::vec3 scale);
             DskGameObject &setRotation(glm::vec3 rotation);
@@ -54,18 +55,22 @@ namespace dsk
                 std::vector<DskGameObject> *gameObjects
             );
 
+            std::string getTag()
+            { return tag; }
+
             glm::vec3 getTranslation()
-            { return transform3d.translation; }
+            { return transform.translation; }
 
             glm::vec3 getScale()
-            { return transform3d.scale; }
+            { return transform.scale; }
 
             glm::vec3 getRotation()
-            { return transform3d.rotation; }
+            { return transform.rotation; }
 
             std::shared_ptr<DskModel> model {};
             glm::vec3 color {};
-            Transform3dComponent transform3d {};
+            Transform3dComponent transform {};
+            std::string tag;
 
         private:
             DskGameObject(id_t objId): id{objId} {}

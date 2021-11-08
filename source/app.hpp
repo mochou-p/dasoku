@@ -31,6 +31,9 @@ namespace dsk
         private:
             void loadGameObjects(DskDescriptorPool &globalPool);
 
+            int activeObj = -1;
+            int lastActiveObj = -1;
+
             void initImGui();
             void setupImGui(glm::vec3 viewerPos);
             void renderImGui(VkCommandBuffer commandBuffer);

@@ -96,23 +96,32 @@ namespace dsk
         return *this;
     }
 
+    DskGameObject &DskGameObject::setTag(std::string name)
+    {
+        tag = name;
+
+        return *this;
+    }
+
     DskGameObject &DskGameObject::setTranslation(glm::vec3 translation)
     {
-        transform3d.translation = translation;
+        transform.translation = translation;
         
         return *this;
     }
 
     DskGameObject &DskGameObject::setScale(glm::vec3 scale)
     {
-        transform3d.scale = scale;
+        transform.scale = scale;
         
         return *this;
     }
 
     DskGameObject &DskGameObject::setRotation(glm::vec3 rotation)
     {
-        transform3d.rotation = rotation;
+        // TODO: % 360 and dont get glm::radians
+        // mistaken for degrees
+        transform.rotation = rotation;
         
         return *this;
     }
