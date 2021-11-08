@@ -23,5 +23,9 @@ layout(set = 1, binding = 1) uniform sampler samp;
 
 void main()
 {
-    outColor = vec4(texture(sampler2D(textures[push.textureIndex], samp), fragUV).xyz, 1.0);
+    vec3 texColor = texture(sampler2D(textures[push.textureIndex], samp), fragUV).xyz;
+    texColor.x += fragColor.x;
+    texColor.y += fragColor.y;
+    texColor.z += fragColor.z;
+    outColor = vec4(texColor, 1.0);
 }

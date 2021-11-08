@@ -376,9 +376,9 @@ namespace dsk
             );
                 ImGui::Text("tag: %s", obj->getTag().c_str());
                 ImGui::Dummy(ImVec2(0.0f, 20.0f));
-                ImGui::Text("transform");
+                ImGui::Text("transform:");
                 ImGui::Dummy(ImVec2(0.0f, 10.0f));
-                ImGui::Text("translation:");
+                ImGui::Text("translation");
                 translation.y *= -1;
                 ImGui::SliderFloat("x",   &translation.x,  -5.0f, 5.0f, "%.4f");
                 ImGui::SliderFloat("y",   &translation.y,  -5.0f, 5.0f, "%.4f");
