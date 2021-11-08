@@ -14,6 +14,7 @@ namespace dsk
     ): width{w}, height{h}, windowName{name}
     {
         initWindow();
+        glfwMaximizeWindow(window);
     }
 
     DskWindow::~DskWindow()
