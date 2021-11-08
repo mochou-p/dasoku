@@ -72,9 +72,10 @@ namespace dsk
         };
     }
 
-    DskGameObject &DskGameObject::setModel(DskDevice &dskDevice, std::string filename)
+    DskGameObject &DskGameObject::setModel(std::string filename, DskDevice &dskDevice)
     {
         std::shared_ptr<DskModel> _model;
+        filename = ".\\resources\\models\\" + filename;
         _model = DskModel::createModelFromFile(dskDevice, filename);
         
         model = _model;
@@ -84,11 +85,13 @@ namespace dsk
 
     DskGameObject &DskGameObject::setTexture
     (
-        DskDevice &dskDevice,
         std::string filename,
-        DskTexture textures[])
+        DskTexture textures[],
+        DskDevice &dskDevice
+    )
     {
         DskTexture texture;
+        filename = ".\\resources\\textures\\" + filename;
         texture.loadImage(filename, dskDevice);
 
         textures[getId()] = texture;

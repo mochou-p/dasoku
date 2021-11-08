@@ -37,14 +37,14 @@ namespace dsk
 
             DskGameObject &setModel
             (
-                DskDevice &dskDevice,
-                std::string filename
+                std::string filename,
+                DskDevice &dskDevice
             );
             DskGameObject &setTexture
             (
-                DskDevice &dskDevice,
                 std::string filename,
-                DskTexture textures[]
+                DskTexture textures[],
+                DskDevice &dskDevice
             );
             DskGameObject &setTag(std::string name);
             DskGameObject &setTranslation(glm::vec3 translation);

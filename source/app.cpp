@@ -223,24 +223,24 @@ namespace dsk
 
         auto cube = DskGameObject::createGameObject()
             .setTag("Cube")
-            .setModel(dskDevice, ".\\resources\\models\\colored_cube.obj")
-            .setTexture(dskDevice, ".\\resources\\textures\\default.png", textures)
+            .setModel("colored_cube.obj", dskDevice)
+            .setTexture("default.png", textures, dskDevice)
             .setTranslation({0.0f, 0.3f, 2.5f})
             .setScale({10.0f, 0.2f, 10.0f})
             .build(&gameObjects);
 
         auto vase = DskGameObject::createGameObject()
             .setTag("Vase")
-            .setModel(dskDevice, ".\\resources\\models\\smooth_vase.obj")
-            .setTexture(dskDevice, ".\\resources\\textures\\default.png", textures)
+            .setModel("smooth_vase.obj", dskDevice)
+            .setTexture("default.png", textures, dskDevice)
             .setTranslation({0.3f, 0.1f, 2.5f})
             .setScale(glm::vec3(1.0f))
             .build(&gameObjects);
         
         auto catgirl = DskGameObject::createGameObject()
             .setTag("Catgirl")
-            .setModel(dskDevice, ".\\resources\\models\\neco-arc\\PBR - Metallic Roughness.obj")
-            .setTexture(dskDevice, ".\\resources\\models\\neco-arc\\BaseColor.png", textures)
+            .setModel("neco_arc.obj", dskDevice)
+            .setTexture("BaseColor.png", textures, dskDevice)
             .setTranslation({-0.3f, 0.1f, 2.5f})
             .setScale({0.3f, -0.3f, 0.3f})
             .build(&gameObjects);
