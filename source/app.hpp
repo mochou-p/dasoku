@@ -29,7 +29,7 @@ namespace dsk
             void run();
 
         private:
-            void loadGameObjects(DskDescriptorPool &globalPool);
+            void loadGameObjects();
 
             int activeObj = -1;
             int lastActiveObj = -1;
@@ -40,7 +40,7 @@ namespace dsk
 
             VkDescriptorPool imguiPool;
 
-            DskTexture textures[64];
+            DskTexture textures[8];
 
             void cleanup
             (

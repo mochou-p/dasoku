@@ -22,19 +22,23 @@ namespace dsk
 {
     struct GlobalUbo
     {
-        alignas(16) glm::mat4 projectionView {1.0f};
-        alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+        glm::mat4 projectionView {1.0f};
+        glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.02f};
+        glm::vec3 lightPosition {0.0f, -1.0f, 0.0f};
+        alignas(16) glm::vec4 lightColor {0.0f, 1.0f, 0.0f, 1.0f};
     };
 
     App::App()
     {
+        loadGameObjects();
+
         globalPool =
             DskDescriptorPool::Builder(dskDevice)
-                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + 3)
+                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + gameObjects.size())
                 .addPoolSize
                 (
                     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + 3
+                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + gameObjects.size()
                 )
                 .addPoolSize
                 (
@@ -42,8 +46,6 @@ namespace dsk
                     10
                 )
                 .build();
-
-        loadGameObjects(*globalPool);
     }
 
     App::~App() {}
@@ -79,7 +81,9 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
-        
+        // TODO: don't do textures for every gameObject
+        // TODO: move some of this to new function(s)
+
         VkDescriptorImageInfo imageInfos[gameObjects.size()];
 
         for (int i = 0; i < gameObjects.size(); i++)
@@ -145,7 +149,9 @@ namespace dsk
             glm::vec3(0.0f, 0.0f, 2.5f)
         );
 
-        auto viewerObject = DskGameObject::createGameObject();
+        auto viewerObject = DskGameObject::createGameObject()
+            .setTranslation({0.0f, -1.25f, -7.0f});
+
         DskKeyboardMovementController cameraController {};
 
         initImGui();
@@ -174,7 +180,7 @@ namespace dsk
             );
 
             float aspect = dskRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 50.0f);
+            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.0f);
 
             setupImGui();
 
@@ -211,36 +217,39 @@ namespace dsk
         cleanup(sampler, imageInfos);
     }
 
-    void App::loadGameObjects(DskDescriptorPool &globalPool)
+    void App::loadGameObjects()
     {
-        // will be setting a default texture
-        // instead of a color for now, make
-        // sure to change cleanup loops when
-        // changing this
-
-        auto cube = DskGameObject::createGameObject()
-            .setTag("Cube")
-            .setModel("colored_cube.obj", dskDevice)
+        DskGameObject::createGameObject()
+            .setTag("Floor")
+            .setModel("quad.obj", dskDevice)
             .setTexture("default.png", textures, dskDevice)
-            .setTranslation({0.0f, 0.3f, 2.5f})
-            .setScale({10.0f, 0.2f, 10.0f})
+            .setTranslation({0.0f, 0.0f, 0.0f})
+            .setScale({3.0f, 1.0f, 3.0f})
             .build(&gameObjects);
 
-        auto vase = DskGameObject::createGameObject()
-            .setTag("Vase")
-            .setModel("smooth_vase.obj", dskDevice)
+        DskGameObject::createGameObject()
+            .setTag("FlatVase")
+            .setModel("flat_vase.obj", dskDevice)
             .setTexture("default.png", textures, dskDevice)
-            .setTranslation({0.3f, 0.1f, 2.5f})
+            .setTranslation({0.3f, 0.0f, 0.0f})
             .setScale(glm::vec3(1.0f))
             .build(&gameObjects);
         
-        auto catgirl = DskGameObject::createGameObject()
+        DskGameObject::createGameObject()
+            .setTag("SmoothVase")
+            .setModel("smooth_vase.obj", dskDevice)
+            .setTexture("default.png", textures, dskDevice)
+            .setTranslation({-0.3f, 0.0f, 0.0f})
+            .setScale(glm::vec3(1.0f))
+            .build(&gameObjects);
+        
+        DskGameObject::createGameObject()
             .setTag("Catgirl")
             .setModel("neco_arc.obj", dskDevice)
             .setTexture("BaseColor.png", textures, dskDevice)
-            .setTranslation({-0.3f, 0.1f, 2.5f})
+            .setTranslation({0.0f, 0.0f, 2.5f})
             .setScale({0.3f, -0.3f, 0.3f})
-            .setRotation({0.0f, glm::radians(75.0f), 0.0f})
+            .setRotation({0.0f, glm::radians(90.0f), 0.0f})
             .build(&gameObjects);
     }
 
@@ -298,6 +307,7 @@ namespace dsk
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
+    // imgui namespace? idk /shrug
     void App::setupImGui()
     {
         ImGui_ImplVulkan_NewFrame();
@@ -349,6 +359,8 @@ namespace dsk
             }
         ImGui::End();
 
+        // TODO: reconsider
+
         if (activeObj > -1)
         {
             auto obj = &gameObjects[activeObj];
@@ -392,9 +404,9 @@ namespace dsk
                 rotation.x = glm::degrees(rotation.x);
                 rotation.y = glm::degrees(rotation.y);
                 rotation.z = glm::degrees(rotation.z);
-                if (rotation.x < 0)   { rotation.x = fmod(rotation.x, 360) + 360; }
-                if (rotation.y < 0)   { rotation.y = fmod(rotation.y, 360) + 360; }
-                if (rotation.z < 0)   { rotation.z = fmod(rotation.z, 360) + 360; }
+                if (rotation.x <  0)   { rotation.x = fmod(rotation.x, 360) + 360; }
+                if (rotation.y <  0)   { rotation.y = fmod(rotation.y, 360) + 360; }
+                if (rotation.z <  0)   { rotation.z = fmod(rotation.z, 360) + 360; }
                 if (rotation.x >= 360) { rotation.x = fmod(rotation.x, 360); }
                 if (rotation.y >= 360) { rotation.y = fmod(rotation.y, 360); }
                 if (rotation.z >= 360) { rotation.z = fmod(rotation.z, 360); }

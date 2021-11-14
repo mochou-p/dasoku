@@ -23,9 +23,13 @@ layout(set = 1, binding = 1) uniform sampler samp;
 
 void main()
 {
-    vec3 texColor = texture(sampler2D(textures[push.textureIndex], samp), fragUV).xyz;
-    texColor.x += fragColor.x;
-    texColor.y += fragColor.y;
-    texColor.z += fragColor.z;
-    outColor = vec4(texColor, 1.0);
+    vec3 texColor = texture(sampler2D(textures[push.textureIndex], samp), fragUV).xyz * (fragColor * vec3(1.5));
+    if (push.textureIndex == 0)
+    {
+        texColor.x += 0.1;
+        texColor.y += 0.1;
+        texColor.z += 0.1;
+    }
+
+    outColor = vec4(texColor * fragColor, 1.0);
 }

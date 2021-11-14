@@ -46,26 +46,16 @@ namespace dsk
                 DskTexture textures[],
                 DskDevice &dskDevice
             );
-            DskGameObject &setTag(std::string name);
-            DskGameObject &setTranslation(glm::vec3 translation);
-            DskGameObject &setScale(glm::vec3 scale);
-            DskGameObject &setRotation(glm::vec3 rotation);
-            DskGameObject &build
-            (
-                std::vector<DskGameObject> *gameObjects
-            );
+            DskGameObject &setTag         (std::string name       );
+            DskGameObject &setTranslation (glm::vec3   translation);
+            DskGameObject &setScale       (glm::vec3   scale      );
+            DskGameObject &setRotation    (glm::vec3   rotation   );
+            DskGameObject &build          (std::vector<DskGameObject> *gameObjects);
 
-            std::string getTag()
-            { return tag; }
-
-            glm::vec3 getTranslation()
-            { return transform.translation; }
-
-            glm::vec3 getScale()
-            { return transform.scale; }
-
-            glm::vec3 getRotation()
-            { return transform.rotation; }
+            inline std::string getTag()         { return tag;                   }
+            inline glm::vec3   getTranslation() { return transform.translation; }
+            inline glm::vec3   getScale()       { return transform.scale;       }
+            inline glm::vec3   getRotation()    { return transform.rotation;    }
 
             std::shared_ptr<DskModel> model {};
             glm::vec3 color {};
