@@ -79,8 +79,8 @@ namespace dsk
                 .build(globalDescriptorSets[i]);
         }
 
-        
-        VkDescriptorImageInfo imageInfos[gameObjects.size()];
+        //Fix for MSVC.... but you later have to delete `imageInfos` var
+        VkDescriptorImageInfo *imageInfos = new VkDescriptorImageInfo[gameObjects.size()];
 
         for (int i = 0; i < gameObjects.size(); i++)
         {

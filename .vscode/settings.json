@@ -52,5 +52,7 @@
         "streambuf": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "cmake.generator": "MSYS Makefiles",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

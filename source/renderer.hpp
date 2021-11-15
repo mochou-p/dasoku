@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include <cassert>
+#include <array>
 
 namespace dsk
 {
@@ -37,6 +38,8 @@ namespace dsk
             int getFrameIndex() const
             {
                 assert(isFrameStarted && "cannot get frame index when frame not in progress");
+                //Fix
+                return currentFrameIndex;
             }
 
             VkCommandBuffer beginFrame();
