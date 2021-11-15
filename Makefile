@@ -29,6 +29,9 @@ DESTROY_SHADERS = del $(SHADERS_PATH)\*.spv
 
 TARGET:
 	cd ".\source\" && $(COMPILE)
+	make run
+	
+run:
 	.\Dasoku
 
 shaders:
