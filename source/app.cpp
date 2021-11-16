@@ -25,7 +25,7 @@ namespace dsk
         glm::mat4 projectionView {1.0f};
         glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.02f};
         glm::vec3 lightPosition {0.0f, -1.0f, 0.0f};
-        alignas(16) glm::vec4 lightColor {0.0f, 1.0f, 0.0f, 1.0f};
+        alignas(16) glm::vec4 lightColor {0.0f, 1.0f, 0.0f, 3.0f};
     };
 
     App::App()

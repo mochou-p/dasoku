@@ -1,5 +1,5 @@
 # Dasoku Engine
-![Dasoku Engine](https://i.imgur.com/NFp6HP6.png "Dasoku Engine")
+![Dasoku Engine](https://i.imgur.com/Mq7oLqw.png "Dasoku Engine")
 
 ## Dependencies
 #### Need to install
@@ -11,3 +11,6 @@
 - [ImGui](https://github.com/ocornut/imgui "https://github.com/ocornut/imgui")
 - [stb](https://github.com/nothings/stb "https://github.com/nothings/stb")
 - [tinyobjloader](https://github.com/tinyobjloader/tinyobjloader "https://github.com/tinyobjloader/tinyobjloader")
+
+## License
+[MIT License](https://github.com/vrecusko/dasoku/blob/master/LICENSE "LICENSE")
