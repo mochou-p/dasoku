@@ -31,12 +31,12 @@ TARGET:
 	cd ".\source\" && $(COMPILE)
 	make run
 	
-run:
-	.\Dasoku
-
 shaders:
 	$(DESTROY_SHADERS)
 	$(COMPILE_SHADERS)
 	$(MOVE_SHADERS)
+
+run:
+	.\Dasoku
 
 .SILENT:
