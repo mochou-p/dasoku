@@ -14,9 +14,7 @@ namespace dsk
     struct DskPushConstantData
     {
         glm::mat4 modelMatrix;
-        glm::mat3 normalMatrix;
-        glm::vec3 dummy;
-        int textureIndex;
+        glm::mat4 normalMatrix;
     };
 
     DskRenderSystem::DskRenderSystem
@@ -117,7 +115,7 @@ namespace dsk
             DskPushConstantData push {};
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();
-            push.textureIndex = obj.getId();
+            push.normalMatrix[3][0] = (float) obj.getId();
 
             vkCmdPushConstants
             (
