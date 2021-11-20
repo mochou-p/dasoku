@@ -25,7 +25,7 @@ namespace dsk
         glm::mat4 projectionView {1.0f};
         glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.02f};
         glm::vec3 lightPosition {0.0f, -1.0f, 0.0f};
-        alignas(16) glm::vec4 lightColor {0.0f, 1.0f, 0.0f, 3.0f};
+        alignas(16) glm::vec4 lightColor {1.0f, 0.9f, 0.8f, 1.0f};
     };
 
     App::App()
@@ -359,24 +359,27 @@ namespace dsk
             }
         ImGui::End();
 
-        // TODO: reconsider
-
         if (activeObj > -1)
         {
             auto obj = &gameObjects[activeObj];
 
-            static glm::vec3 translation {obj->transform.translation};
-            static glm::vec3 scale       {obj->transform.scale      };
-            static glm::vec3 rotation    {obj->transform.rotation   };
+            static glm::vec3 *translation {&obj->transform.translation};
+            static glm::vec3 *scale       {&obj->transform.scale      };
+            static glm::vec3 *rotation    {&obj->transform.rotation   };
 
             if (activeObj != lastActiveObj)
             {
-                translation = {obj->transform.translation};
-                scale       = {obj->transform.scale      };
-                rotation    = {obj->transform.rotation   };
+                translation = {&obj->transform.translation};
+                scale       = {&obj->transform.scale      };
+                rotation    = {&obj->transform.rotation   };
 
                 lastActiveObj = activeObj;
             }
+
+            translation->y *= -1;
+            rotation->x = glm::degrees(rotation->x);
+            rotation->y = glm::degrees(rotation->y);
+            rotation->z = glm::degrees(rotation->z);
 
             ImGui::Begin
             (
@@ -389,38 +392,31 @@ namespace dsk
                 ImGui::Text("transform:");
                 ImGui::Dummy(ImVec2(0.0f, 10.0f));
                 ImGui::Text("translation");
-                translation.y *= -1;
-                ImGui::InputFloat("x", &translation.x, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y", &translation.y, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z", &translation.z, 0.01f, 0.2f, "%.4f");
-                translation.y *= -1;
+                ImGui::InputFloat("x", &translation->x, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("y", &translation->y, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("z", &translation->z, 0.01f, 0.2f, "%.4f");
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("scale");
-                ImGui::InputFloat("x ", &scale.x, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y ", &scale.y, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z ", &scale.z, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("x ", &scale->x, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("y ", &scale->y, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("z ", &scale->z, 0.01f, 0.2f, "%.4f");
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("rotation");
-                rotation.x = glm::degrees(rotation.x);
-                rotation.y = glm::degrees(rotation.y);
-                rotation.z = glm::degrees(rotation.z);
-                if (rotation.x <  0)   { rotation.x = fmod(rotation.x, 360) + 360; }
-                if (rotation.y <  0)   { rotation.y = fmod(rotation.y, 360) + 360; }
-                if (rotation.z <  0)   { rotation.z = fmod(rotation.z, 360) + 360; }
-                if (rotation.x >= 360) { rotation.x = fmod(rotation.x, 360); }
-                if (rotation.y >= 360) { rotation.y = fmod(rotation.y, 360); }
-                if (rotation.z >= 360) { rotation.z = fmod(rotation.z, 360); }
-                ImGui::InputFloat("x  ", &rotation.x, 1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("y  ", &rotation.y, 1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("z  ", &rotation.z, 1.0f, 10.0f, "%.0f");
-                rotation.x = glm::radians(rotation.x);
-                rotation.y = glm::radians(rotation.y);
-                rotation.z = glm::radians(rotation.z);
+                if (rotation->x <  0)   { rotation->x = fmod(rotation->x, 360) + 360; }
+                if (rotation->y <  0)   { rotation->y = fmod(rotation->y, 360) + 360; }
+                if (rotation->z <  0)   { rotation->z = fmod(rotation->z, 360) + 360; }
+                if (rotation->x >= 360) { rotation->x = fmod(rotation->x, 360); }
+                if (rotation->y >= 360) { rotation->y = fmod(rotation->y, 360); }
+                if (rotation->z >= 360) { rotation->z = fmod(rotation->z, 360); }
+                ImGui::InputFloat("x  ", &rotation->x, 1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("y  ", &rotation->y, 1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("z  ", &rotation->z, 1.0f, 10.0f, "%.0f");
             ImGui::End();
 
-            if (obj->transform.translation != translation) { obj->setTranslation(translation); }
-            if (obj->transform.scale       != scale      ) { obj->setScale(scale);             }
-            if (obj->transform.rotation    != rotation   ) { obj->setRotation(rotation);       }
+            translation->y *= -1;
+            rotation->x = glm::radians(rotation->x);
+            rotation->y = glm::radians(rotation->y);
+            rotation->z = glm::radians(rotation->z);
         }
 
         ImGui::PopStyleColor(6);
