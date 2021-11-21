@@ -188,10 +188,10 @@ namespace dsk
                 viewerObject.transform.rotation.y,
                 0.0f
             });
-            //gameObjects[4].setScale
-            //(
-            //    (viewerObject.getTranslation() - gameObjects[4].getTranslation()) * 0.5f
-            //);
+            gameObjects[4].setScale
+            (
+                glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[4].getTranslation())) * 0.05f
+            );
 
             setupImGui();
 

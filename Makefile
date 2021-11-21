@@ -29,7 +29,7 @@ DESTROY_SHADERS = del $(SHADERS_PATH)\*.spv
 
 TARGET:
 	cd ".\source\" && $(COMPILE)
-	
+
 shaders:
 	$(DESTROY_SHADERS)
 	$(COMPILE_SHADERS)
