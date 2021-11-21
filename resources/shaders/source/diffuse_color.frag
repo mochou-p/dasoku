@@ -17,7 +17,7 @@ layout (push_constant) uniform Push
     mat4 normalMatrix;
 } push;
 
-layout(set = 1, binding = 0) uniform texture2D textures[4];
+layout(set = 1, binding = 0) uniform texture2D textures[5];
 layout(set = 1, binding = 1) uniform sampler samp;
 
 void main()

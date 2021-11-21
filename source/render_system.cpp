@@ -126,6 +126,7 @@ namespace dsk
                 sizeof(DskPushConstantData),
                 &push
             );
+
             obj.model->bind(frameInfo.commandBuffer);
             obj.model->draw(frameInfo.commandBuffer);
         }

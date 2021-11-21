@@ -38,4 +38,9 @@ shaders:
 run:
 	.\Dasoku
 
+all:
+	make
+	make shaders
+	make run
+
 .SILENT:

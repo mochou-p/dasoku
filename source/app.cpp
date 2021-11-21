@@ -180,7 +180,18 @@ namespace dsk
             );
 
             float aspect = dskRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+
+            gameObjects[4].setRotation
+            ({
+                viewerObject.transform.rotation.x - glm::radians(90.0f),
+                viewerObject.transform.rotation.y,
+                0.0f
+            });
+            //gameObjects[4].setScale
+            //(
+            //    (viewerObject.getTranslation() - gameObjects[4].getTranslation()) * 0.5f
+            //);
 
             setupImGui();
 
@@ -223,7 +234,6 @@ namespace dsk
             .setTag("Floor")
             .setModel("quad.obj", dskDevice)
             .setTexture("default.png", textures, dskDevice)
-            .setTranslation({0.0f, 0.0f, 0.0f})
             .setScale({3.0f, 1.0f, 3.0f})
             .build(&gameObjects);
 
@@ -232,7 +242,6 @@ namespace dsk
             .setModel("flat_vase.obj", dskDevice)
             .setTexture("default.png", textures, dskDevice)
             .setTranslation({0.3f, 0.0f, 0.0f})
-            .setScale(glm::vec3(1.0f))
             .build(&gameObjects);
         
         DskGameObject::createGameObject()
@@ -240,7 +249,6 @@ namespace dsk
             .setModel("smooth_vase.obj", dskDevice)
             .setTexture("default.png", textures, dskDevice)
             .setTranslation({-0.3f, 0.0f, 0.0f})
-            .setScale(glm::vec3(1.0f))
             .build(&gameObjects);
         
         DskGameObject::createGameObject()
@@ -251,6 +259,17 @@ namespace dsk
             .setScale({0.3f, -0.3f, 0.3f})
             .setRotation({0.0f, glm::radians(90.0f), 0.0f})
             .build(&gameObjects);
+        
+        // temp solution
+        DskGameObject::createGameObject()
+            .setTag("PointLight1")
+            .setModel("quad.obj", dskDevice)
+            .setTexture("PointLight.png", textures, dskDevice)
+            .setTranslation({0.0f, -1.0f, 0.0f})
+            .setScale(glm::vec3(0.1f))
+            .build(&gameObjects);
+
+        // 5
     }
 
     void App::initImGui()
@@ -307,7 +326,7 @@ namespace dsk
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    // imgui namespace? idk /shrug
+    // imgui namespace? idk
     void App::setupImGui()
     {
         ImGui_ImplVulkan_NewFrame();
