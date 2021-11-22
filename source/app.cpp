@@ -23,7 +23,7 @@ namespace dsk
     struct GlobalUbo
     {
         glm::mat4 projectionView {1.0f};
-        glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.1f};
+        glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.05f};
         glm::vec3 lightPosition {0.0f, -1.0f, 0.0f};
         alignas(16) glm::vec4 lightColor {1.0f, 0.9f, 0.8f, 1.0f};
     };
@@ -68,7 +68,12 @@ namespace dsk
         }
 
         auto globalSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .addBinding
+            (
+                0,
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                VK_SHADER_STAGE_VERTEX_BIT |
+                VK_SHADER_STAGE_FRAGMENT_BIT)
             .build();
         
         std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -190,7 +195,7 @@ namespace dsk
             });
             gameObjects[4].setScale
             (
-                glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[4].getTranslation())) * 0.05f
+                glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[4].getTranslation())) * 0.04f
             );
 
             setupImGui();
@@ -233,7 +238,7 @@ namespace dsk
         DskGameObject::createGameObject()
             .setTag("Floor")
             .setModel("quad.obj", dskDevice)
-            .setTexture("default.png", textures, dskDevice)
+            .setTexture("Banana.png", textures, dskDevice)
             .setScale({3.0f, 1.0f, 3.0f})
             .build(&gameObjects);
 
@@ -266,7 +271,6 @@ namespace dsk
             .setModel("quad.obj", dskDevice)
             .setTexture("PointLight.png", textures, dskDevice)
             .setTranslation({0.0f, -1.0f, 0.0f})
-            .setScale(glm::vec3(0.1f))
             .build(&gameObjects);
 
         // 5

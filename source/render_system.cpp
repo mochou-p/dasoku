@@ -116,6 +116,10 @@ namespace dsk
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();
             push.normalMatrix[3][0] = (float) obj.getId();
+            if (obj.getId() == 4)
+            {
+                push.normalMatrix[3][1] = 1.0f;
+            }
 
             vkCmdPushConstants
             (
