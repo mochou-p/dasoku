@@ -40,7 +40,7 @@ namespace dsk
 
             VkDescriptorPool imguiPool;
 
-            DskTexture textures[8];
+            DskTexture textures[32];
 
             void cleanup
             (

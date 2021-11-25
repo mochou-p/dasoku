@@ -84,8 +84,8 @@ namespace dsk
         dskPipeline = std::make_unique<DskPipeline>
         (
             dskDevice,
-            ".\\resources\\shaders\\diffuse_color.vert.spv",
-            ".\\resources\\shaders\\diffuse_color.frag.spv",
+            ".\\resources\\shaders\\simple.vert.spv",
+            ".\\resources\\shaders\\simple.frag.spv",
             pipelineConfig
         );
     }
@@ -116,9 +116,17 @@ namespace dsk
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();
             push.normalMatrix[3][0] = (float) obj.getId();
-            if (obj.getId() == 4)
+            if (obj.getId() == 6)
             {
                 push.normalMatrix[3][1] = 1.0f;
+            }
+            if (obj.getId() == 7)
+            {
+                push.normalMatrix[3][1] = 2.0f;
+            }
+            if (obj.getId() == 8)
+            {
+                push.normalMatrix[3][1] = 3.0f;
             }
 
             vkCmdPushConstants

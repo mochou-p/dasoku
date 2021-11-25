@@ -22,10 +22,19 @@ namespace dsk
 {
     struct GlobalUbo
     {
-        glm::mat4 projectionView {1.0f};
-        glm::vec4 ambientLightColor {1.0f, 1.0f, 1.0f, 0.05f};
-        glm::vec3 lightPosition {0.0f, -1.0f, 0.0f};
-        alignas(16) glm::vec4 lightColor {1.0f, 0.9f, 0.8f, 1.0f};
+        glm::mat4 projectionViewMatrix {1.0f};
+        glm::vec4 ambientLightColor {0.8f, 0.95f, 1.0f, 0.03f};
+        glm::vec4 lights[6] =
+            {
+                { -0.5f, -0.75f, -0.5f,  0.0f },
+                {  1.0f,  0.0f ,  0.0f,  4.0f },
+
+                {  0.0f, -0.75f,  0.5f,  0.0f },
+                {  0.0f,  1.0f ,  0.0f,  4.0f },
+
+                {  0.5f, -0.75f, -0.5f,  0.0f },
+                {  0.0f,  0.0f ,  1.0f,  4.0f }
+            };
     };
 
     App::App()
@@ -187,16 +196,27 @@ namespace dsk
             float aspect = dskRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
-            gameObjects[4].setRotation
-            ({
-                viewerObject.transform.rotation.x - glm::radians(90.0f),
-                viewerObject.transform.rotation.y,
-                0.0f
-            });
-            gameObjects[4].setScale
-            (
-                glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[4].getTranslation())) * 0.04f
-            );
+            for (int i = 0; i < gameObjects.size(); i++)
+            {
+                if
+                (
+                    gameObjects[i].getId() == 6 ||
+                    gameObjects[i].getId() == 7 ||
+                    gameObjects[i].getId() == 8
+                )
+                {
+                    gameObjects[i].setRotation
+                    ({
+                        viewerObject.transform.rotation.x - glm::radians(90.0f),
+                        viewerObject.transform.rotation.y,
+                        0.0f
+                    });
+                    gameObjects[i].setScale
+                    (
+                        glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[i].getTranslation())) * 0.03f
+                    );
+                }
+            }
 
             setupImGui();
 
@@ -218,7 +238,7 @@ namespace dsk
                 };
 
                 GlobalUbo ubo {};
-                ubo.projectionView = camera.getProjection() * camera.getView();
+                ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
@@ -235,24 +255,46 @@ namespace dsk
 
     void App::loadGameObjects()
     {
+        // TODO: dont create duplicate textures,
+        //       set textureIndex to the texture
+        //       thats already in textures[]
+
         DskGameObject::createGameObject()
             .setTag("Floor")
             .setModel("quad.obj", dskDevice)
-            .setTexture("Banana.png", textures, dskDevice)
+            .setTexture("_grey.png", textures, dskDevice)
             .setScale({3.0f, 1.0f, 3.0f})
+            .build(&gameObjects);
+
+        DskGameObject::createGameObject()
+            .setTag("Wall1")
+            .setModel("quad.obj", dskDevice)
+            .setTexture("Banana.png", textures, dskDevice)
+            .setTranslation({0.0f, -1.0f, 3.0f})
+            .setScale({1.0f, 1.0f, 3.0f})
+            .setRotation({glm::radians(180.0f), glm::radians(90.0f), glm::radians(90.0f)})
+            .build(&gameObjects);
+
+        DskGameObject::createGameObject()
+            .setTag("Wall2")
+            .setModel("quad.obj", dskDevice)
+            .setTexture("Banana.png", textures, dskDevice)
+            .setTranslation({-3.0f, -1.0f, 0.0f})
+            .setScale({1.0f, 1.0f, 3.0f})
+            .setRotation({glm::radians(180.0f), 0.0f, glm::radians(90.0f)})
             .build(&gameObjects);
 
         DskGameObject::createGameObject()
             .setTag("FlatVase")
             .setModel("flat_vase.obj", dskDevice)
-            .setTexture("default.png", textures, dskDevice)
+            .setTexture("_white.png", textures, dskDevice)
             .setTranslation({0.3f, 0.0f, 0.0f})
             .build(&gameObjects);
         
         DskGameObject::createGameObject()
             .setTag("SmoothVase")
             .setModel("smooth_vase.obj", dskDevice)
-            .setTexture("default.png", textures, dskDevice)
+            .setTexture("_white.png", textures, dskDevice)
             .setTranslation({-0.3f, 0.0f, 0.0f})
             .build(&gameObjects);
         
@@ -267,13 +309,27 @@ namespace dsk
         
         // temp solution
         DskGameObject::createGameObject()
-            .setTag("PointLight1")
+            .setTag("PointLightR")
             .setModel("quad.obj", dskDevice)
             .setTexture("PointLight.png", textures, dskDevice)
-            .setTranslation({0.0f, -1.0f, 0.0f})
+            .setTranslation({-0.5f, -0.75f, -0.5f})
             .build(&gameObjects);
 
-        // 5
+        DskGameObject::createGameObject()
+            .setTag("PointLightG")
+            .setModel("quad.obj", dskDevice)
+            .setTexture("PointLight.png", textures, dskDevice)
+            .setTranslation({0.0f, -0.75f,  0.5f})
+            .build(&gameObjects);
+
+        DskGameObject::createGameObject()
+            .setTag("PointLightB")
+            .setModel("quad.obj", dskDevice)
+            .setTexture("PointLight.png", textures, dskDevice)
+            .setTranslation({0.5f, -0.75f, -0.5f})
+            .build(&gameObjects);
+
+        // 9
     }
 
     void App::initImGui()
@@ -415,14 +471,14 @@ namespace dsk
                 ImGui::Text("transform:");
                 ImGui::Dummy(ImVec2(0.0f, 10.0f));
                 ImGui::Text("translation");
-                ImGui::InputFloat("x", &translation->x, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y", &translation->y, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z", &translation->z, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("x", &translation->x, 0.01f, 0.05f, "%.4f");
+                ImGui::InputFloat("y", &translation->y, 0.01f, 0.05f, "%.4f");
+                ImGui::InputFloat("z", &translation->z, 0.01f, 0.05f, "%.4f");
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("scale");
-                ImGui::InputFloat("x ", &scale->x, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("y ", &scale->y, 0.01f, 0.2f, "%.4f");
-                ImGui::InputFloat("z ", &scale->z, 0.01f, 0.2f, "%.4f");
+                ImGui::InputFloat("x ", &scale->x, 0.01f, 0.05f, "%.4f");
+                ImGui::InputFloat("y ", &scale->y, 0.01f, 0.05f, "%.4f");
+                ImGui::InputFloat("z ", &scale->z, 0.01f, 0.05f, "%.4f");
                 ImGui::Dummy(ImVec2(0.0f, 5.0f));
                 ImGui::Text("rotation");
                 if (rotation->x <  0)   { rotation->x = fmod(rotation->x, 360) + 360; }
@@ -431,9 +487,9 @@ namespace dsk
                 if (rotation->x >= 360) { rotation->x = fmod(rotation->x, 360); }
                 if (rotation->y >= 360) { rotation->y = fmod(rotation->y, 360); }
                 if (rotation->z >= 360) { rotation->z = fmod(rotation->z, 360); }
-                ImGui::InputFloat("x  ", &rotation->x, 1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("y  ", &rotation->y, 1.0f, 10.0f, "%.0f");
-                ImGui::InputFloat("z  ", &rotation->z, 1.0f, 10.0f, "%.0f");
+                ImGui::InputFloat("x  ", &rotation->x, 1.0f, 5.0f, "%.0f");
+                ImGui::InputFloat("y  ", &rotation->y, 1.0f, 5.0f, "%.0f");
+                ImGui::InputFloat("z  ", &rotation->z, 1.0f, 5.0f, "%.0f");
             ImGui::End();
 
             translation->y *= -1;
