@@ -26,15 +26,16 @@ namespace dsk
         glm::vec4 ambientLightColor {0.8f, 0.95f, 1.0f, 0.03f};
         glm::vec4 lights[6] =
             {
-                { -0.5f, -0.75f, -0.5f,  0.0f },
-                {  1.0f,  0.0f ,  0.0f,  4.0f },
+                { -0.50f, -0.75f, -0.50f,  0.00f },
+                {  0.30f,  0.30f,  1.00f,  1.00f },
 
-                {  0.0f, -0.75f,  0.5f,  0.0f },
-                {  0.0f,  1.0f ,  0.0f,  4.0f },
+                {  0.00f, -0.75f,  0.50f,  0.00f },
+                {  0.00f,  0.20f,  1.00f,  1.00f },
 
-                {  0.5f, -0.75f, -0.5f,  0.0f },
-                {  0.0f,  0.0f ,  1.0f,  4.0f }
+                {  0.50f, -0.75f, -0.50f,  0.00f },
+                {  1.00f,  0.50f,  0.00f,  1.00f }
             };
+        glm::vec4 shaderBox {0.0f};
     };
 
     App::App()
@@ -86,7 +87,7 @@ namespace dsk
             .build();
         
         std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
-        
+
         for (int i = 0; i < globalDescriptorSets.size(); i++)
         {
             auto bufferInfo = uboBuffers[i]->descriptorInfo();
@@ -141,7 +142,7 @@ namespace dsk
                 VK_SHADER_STAGE_FRAGMENT_BIT
             )
             .build();
-        
+
         VkDescriptorSet textureDescriptorSet;
         DskDescriptorWriter(*textureSetLayout, *globalPool)
             .writeImage(0, imageInfos, gameObjects.size())
@@ -196,6 +197,7 @@ namespace dsk
             float aspect = dskRenderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
+            // billboards
             for (int i = 0; i < gameObjects.size(); i++)
             {
                 if
@@ -218,8 +220,6 @@ namespace dsk
                 }
             }
 
-            setupImGui();
-
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
                 int frameIndex = dskRenderer.getFrameIndex();
@@ -237,14 +237,19 @@ namespace dsk
                     }
                 };
 
+                setupImGui();
+
                 GlobalUbo ubo {};
                 ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
+                ubo.shaderBox = shaderBox;
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
                 dskRenderer.beginSwapChainRenderPass(commandBuffer);
                 dskRenderSystem.renderGameObjects(frameInfo, gameObjects);
+
                 renderImGui(commandBuffer);
+
                 dskRenderer.endSwapChainRenderPass(commandBuffer);
                 dskRenderer.endFrame();
             }
@@ -386,7 +391,6 @@ namespace dsk
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    // imgui namespace? idk
     void App::setupImGui()
     {
         ImGui_ImplVulkan_NewFrame();
@@ -403,8 +407,8 @@ namespace dsk
 
         ImGuiWindowFlags windowFlags =
             ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoResize   |
+            ImGuiWindowFlags_NoMove     |
             ImGuiWindowFlags_NoFocusOnAppearing;
 
         ImGui::Begin
@@ -432,9 +436,13 @@ namespace dsk
                 auto active = obj.getId() == activeObj;
 
                 if (active)
-                { ImGui::PushStyleColor(ImGuiCol_Button, {0.3f, 0.3f, 0.3f, 0.3f}); }
-                if (ImGui::Button(obj.getTag().c_str())) { activeObj = obj.getId(); }
-                if (active) { ImGui::PopStyleColor(1); }
+                    ImGui::PushStyleColor(ImGuiCol_Button, {0.3f, 0.3f, 0.3f, 0.3f});
+
+                if (ImGui::Button(obj.getTag().c_str()))
+                    activeObj = obj.getId();
+
+                if (active)
+                    ImGui::PopStyleColor(1);
             }
         ImGui::End();
 
@@ -498,6 +506,22 @@ namespace dsk
             rotation->z = glm::radians(rotation->z);
         }
 
+        ImGui::Begin
+        (
+            "shaderbox",
+            nullptr,
+            ImGuiWindowFlags_NoBackground |
+            ImGuiWindowFlags_NoFocusOnAppearing
+        );
+//            if (ImGui::Button("reload shader"))
+            ImVec2 pos  = ImGui::GetWindowPos();
+            ImVec2 size = ImGui::GetWindowSize();
+            shaderBox.x = pos.x;
+            shaderBox.y = pos.y;
+            shaderBox.z = pos.x + size.x;
+            shaderBox.w = pos.y + size.y;
+        ImGui::End();
+
         ImGui::PopStyleColor(6);
 
         ImGui::Render();
@@ -525,13 +549,9 @@ namespace dsk
         vkDestroySampler(dskDevice.device(), sampler, nullptr);
 
         for (int i = 0; i < gameObjects.size(); i++)
-        {
             vkDestroyImageView(dskDevice.device(), imageInfos[i].imageView, nullptr);
-        }
 
         for (int i = 0; i < gameObjects.size(); i++)
-        {
             textures[i].cleanup(dskDevice);
-        }
     }
 }

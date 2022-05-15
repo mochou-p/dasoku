@@ -6,14 +6,14 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/VulkanSDK/1.2.189.2/Include/**"
+                "C:/VulkanSDK/1.3.211.0/Include/**" // CHANGE
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "compilerPath": "C:/mingw64/bin/gcc.exe",
+            "compilerPath": "C:/programdata/chocolatey/bin/gcc.exe", // CHANGE
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64"

@@ -54,5 +54,7 @@ namespace dsk
 
             std::unique_ptr<DskDescriptorPool> globalPool {};
             std::vector<DskGameObject> gameObjects;
+
+            glm::vec4 shaderBox;
     };
 }

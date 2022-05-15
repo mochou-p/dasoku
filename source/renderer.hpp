@@ -37,6 +37,8 @@ namespace dsk
             int getFrameIndex() const
             {
                 assert(isFrameStarted && "cannot get frame index when frame not in progress");
+
+                return currentFrameIndex;
             }
 
             VkCommandBuffer beginFrame();

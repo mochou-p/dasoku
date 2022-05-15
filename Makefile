@@ -1,16 +1,13 @@
 # dasoku
 
-DEPS  = .\..\libs
-_DEPS = .\libs
+VULKAN_SDK_PATH = C:\VulkanSDK\1.3.211.0 # CHANGE
 
-VULKAN_SDK_PATH = C:\VulkanSDK\1.2.189.2
-
-GLFW_PATH    = $(DEPS)\GLFW
-GLM_PATH     = $(DEPS)\GLM
-GLSLC_PATH   = $(_DEPS)\GLSLC
-TINYOBJ_PATH = $(DEPS)\TINYOBJ
-IMGUI_PATH   = $(DEPS)\IMGUI
-STB_PATH     = $(DEPS)\STB
+GLFW_PATH    = .\..\libs\GLFW
+GLM_PATH     = .\..\libs\GLM
+GLSLC_PATH   = .libs\GLSLC
+TINYOBJ_PATH = .\..\libs\TINYOBJ
+IMGUI_PATH   = .\..\libs\IMGUI
+STB_PATH     = .\..\libs\STB
 
 SHADERS_PATH = .\resources\shaders
 
@@ -29,6 +26,7 @@ DESTROY_SHADERS = del $(SHADERS_PATH)\*.spv
 
 TARGET:
 	cd ".\source\" && $(COMPILE)
+	make run
 
 shaders:
 	$(DESTROY_SHADERS)
@@ -41,6 +39,3 @@ run:
 all:
 	make shaders
 	make
-	make run
-
-.SILENT:

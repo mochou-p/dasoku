@@ -21,7 +21,8 @@ layout (set = 0, binding = 0) uniform GlobalUbo
 {
     mat4 projectionViewMatrix;
     vec4 ambientLightColor;
-    vec4 lights[2];
+    vec4 lights[6];
+    vec4 shaderBox;
 } ubo;
 
 layout (push_constant) uniform Push
