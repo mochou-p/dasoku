@@ -20,6 +20,7 @@ layout (set = 0, binding = 0) uniform GlobalUbo
     vec4 ambientLightColor;
     vec4 lights[6];
     vec4 shaderBox;
+    float time;
 } ubo;
 
 layout (push_constant) uniform Push
@@ -60,7 +61,12 @@ void main()
             gl_FragCoord.x > ubo.shaderBox.x && gl_FragCoord.x < ubo.shaderBox.z &&
             gl_FragCoord.y > ubo.shaderBox.y && gl_FragCoord.y < ubo.shaderBox.w
         )
+        {
             outColor = vec4(texColor * light, 1.0);
+            outColor.x -= sin(ubo.time) * 0.2;
+            outColor.y += cos(ubo.time) * 0.2;
+            outColor.z += sin(ubo.time) * 0.2;
+        }
         else
             outColor = vec4(light, 1.0);
     }

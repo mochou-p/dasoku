@@ -36,6 +36,7 @@ namespace dsk
                 {  1.00f,  0.50f,  0.00f,  1.00f }
             };
         glm::vec4 shaderBox {0.0f};
+        float time = 0;
     };
 
     App::App()
@@ -242,6 +243,7 @@ namespace dsk
                 GlobalUbo ubo {};
                 ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
                 ubo.shaderBox = shaderBox;
+                ubo.time = glfwGetTime();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
