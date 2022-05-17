@@ -1,10 +1,10 @@
 # dasoku
 
-VULKAN_SDK_PATH = C:\VulkanSDK\1.3.211.0 # CHANGE
+VULKAN_SDK_PATH = C:\VulkanSDK\1.3.211.0
 
 GLFW_PATH    = .\..\libs\GLFW
 GLM_PATH     = .\..\libs\GLM
-GLSLC_PATH   = .libs\GLSLC
+GLSLC_PATH   = .\libs\GLSLC
 TINYOBJ_PATH = .\..\libs\TINYOBJ
 IMGUI_PATH   = .\..\libs\IMGUI
 STB_PATH     = .\..\libs\STB
