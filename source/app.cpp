@@ -1,9 +1,6 @@
 // dsk
 
 #include "app.hpp"
-#include "render_system.hpp"
-#include "camera.hpp"
-#include "keyboard_movement_controller.hpp"
 #include "buffer.hpp"
 
 #include "imgui.h"
@@ -26,8 +23,8 @@ namespace dsk
         glm::vec4 ambientLightColor {0.8f, 0.95f, 1.0f, 0.03f};
         glm::vec4 lights[6] =
             {
-                { -0.50f, -0.75f, -0.50f,  0.00f },
-                {  0.30f,  0.30f,  1.00f,  1.00f },
+                { -0.50f, -0.75f, -0.50f,  0.00f }, // pos
+                {  0.30f,  0.30f,  1.00f,  1.00f }, // color
 
                 {  0.00f, -0.75f,  0.50f,  0.00f },
                 {  0.00f,  0.20f,  1.00f,  1.00f },
@@ -41,7 +38,7 @@ namespace dsk
 
     App::App()
     {
-        loadGameObjects();
+        LoadGameObjects();
 
         globalPool =
             DskDescriptorPool::Builder(dskDevice)
@@ -63,114 +60,13 @@ namespace dsk
 
     void App::run()
     {
-        std::vector<std::unique_ptr<DskBuffer>> uboBuffers(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
+        InitUniformBuffers();
+        DescriptorSets();
+        Textures();
+        RenderSystem();
+        InitCamera();
 
-        for (int i = 0; i < uboBuffers.size(); i++)
-        {
-            uboBuffers[i] = std::make_unique<DskBuffer>
-            (
-                dskDevice,
-                sizeof(GlobalUbo),
-                1,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-            );
-            uboBuffers[i]->map();
-        }
-
-        auto globalSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding
-            (
-                0,
-                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                VK_SHADER_STAGE_VERTEX_BIT |
-                VK_SHADER_STAGE_FRAGMENT_BIT)
-            .build();
-        
-        std::vector<VkDescriptorSet> globalDescriptorSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT);
-
-        for (int i = 0; i < globalDescriptorSets.size(); i++)
-        {
-            auto bufferInfo = uboBuffers[i]->descriptorInfo();
-            DskDescriptorWriter(*globalSetLayout, *globalPool)
-                .writeBuffer(0, &bufferInfo)
-                .build(globalDescriptorSets[i]);
-        }
-
-        // TODO: don't do textures for every gameObject
-        // TODO: move some of this to new function(s)
-
-        VkDescriptorImageInfo imageInfos[gameObjects.size()];
-
-        for (int i = 0; i < gameObjects.size(); i++)
-        {
-            imageInfos[i].sampler = nullptr;
-            imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfos[i].imageView = textures[i].imageView;
-        }
-
-        VkSamplerCreateInfo samplerInfo {};
-        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        samplerInfo.magFilter = VK_FILTER_LINEAR;
-        samplerInfo.minFilter = VK_FILTER_LINEAR;
-        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-        samplerInfo.unnormalizedCoordinates = VK_FALSE;
-        samplerInfo.compareEnable = VK_FALSE;
-
-        VkSampler sampler;
-        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
-
-        VkDescriptorImageInfo samplerImageInfo {};
-        samplerImageInfo.sampler = sampler;
-        samplerImageInfo.imageView = nullptr;
-        samplerImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        auto textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
-            .addBinding
-            (
-                0,
-                VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                gameObjects.size()
-            )
-            .addBinding
-            (
-                1,
-                VK_DESCRIPTOR_TYPE_SAMPLER,
-                VK_SHADER_STAGE_FRAGMENT_BIT
-            )
-            .build();
-
-        VkDescriptorSet textureDescriptorSet;
-        DskDescriptorWriter(*textureSetLayout, *globalPool)
-            .writeImage(0, imageInfos, gameObjects.size())
-            .writeImage(1, &samplerImageInfo, 1)
-            .build(textureDescriptorSet);
-
-        DskRenderSystem dskRenderSystem
-        {
-            dskDevice,
-            dskRenderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout(),
-            textureSetLayout->getDescriptorSetLayout()
-        };
-
-        DskCamera camera {};
-        camera.setViewTarget
-        (
-            glm::vec3(-1.0f, -2.5f, 2.0f),
-            glm::vec3(0.0f, 0.0f, 2.5f)
-        );
-
-        auto viewerObject = DskGameObject::createGameObject()
-            .setTranslation({0.0f, -1.25f, -7.0f});
-
-        DskKeyboardMovementController cameraController {};
-
-        initImGui();
+        InitImGui();
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
@@ -183,84 +79,32 @@ namespace dsk
                 <float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
 
-            cameraController.moveInPlaneXZ
-            (
-                dskWindow.getGLFWwindow(),
-                frameTime,
-                viewerObject
-            );
-            camera.setViewYXZ
-            (
-                viewerObject.transform.translation,
-                viewerObject.transform.rotation
-            );
+            UpdateCamera(frameTime);
 
-            float aspect = dskRenderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
-
-            // billboards
-            for (int i = 0; i < gameObjects.size(); i++)
-            {
-                if
-                (
-                    gameObjects[i].getId() == 6 ||
-                    gameObjects[i].getId() == 7 ||
-                    gameObjects[i].getId() == 8
-                )
-                {
-                    gameObjects[i].setRotation
-                    ({
-                        viewerObject.transform.rotation.x - glm::radians(90.0f),
-                        viewerObject.transform.rotation.y,
-                        0.0f
-                    });
-                    gameObjects[i].setScale
-                    (
-                        glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[i].getTranslation())) * 0.03f
-                    );
-                }
-            }
+            Billboards();
 
             if (auto commandBuffer = dskRenderer.beginFrame())
             {
-                int frameIndex = dskRenderer.getFrameIndex();
-                DskFrameInfo frameInfo
-                {
-                    frameIndex,
-                    frameTime,
-                    commandBuffer,
-                    camera,
-                    globalDescriptorSets[frameIndex],
-                    textureDescriptorSet,
-                    {
-                        globalDescriptorSets[frameIndex],
-                        textureDescriptorSet
-                    }
-                };
+                FrameInfo(frameTime, commandBuffer);
 
-                setupImGui();
+                SetupImGui();
 
-                GlobalUbo ubo {};
-                ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
-                ubo.shaderBox = shaderBox;
-                ubo.time = glfwGetTime();
-                uboBuffers[frameIndex]->writeToBuffer(&ubo);
-                uboBuffers[frameIndex]->flush();
+                UpdateUniformBuffers();
 
                 dskRenderer.beginSwapChainRenderPass(commandBuffer);
                 dskRenderSystem.renderGameObjects(frameInfo, gameObjects);
 
-                renderImGui(commandBuffer);
+                RenderImGui(commandBuffer);
 
                 dskRenderer.endSwapChainRenderPass(commandBuffer);
                 dskRenderer.endFrame();
             }
         }
 
-        cleanup(sampler, imageInfos);
+        Cleanup(sampler, imageInfos);
     }
 
-    void App::loadGameObjects()
+    void App::LoadGameObjects()
     {
         // TODO: dont create duplicate textures,
         //       set textureIndex to the texture
@@ -339,7 +183,7 @@ namespace dsk
         // 9
     }
 
-    void App::initImGui()
+    void App::InitImGui()
     {
         VkDescriptorPoolSize pool_sizes[] =
             {
@@ -393,7 +237,7 @@ namespace dsk
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    void App::setupImGui()
+    void App::SetupImGui()
     {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -529,16 +373,194 @@ namespace dsk
         ImGui::Render();
     }
     
-    void App::renderImGui(VkCommandBuffer commandBuffer)
+    void App::RenderImGui(VkCommandBuffer commandBuffer)
     {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
     }
 
-    void App::cleanup
-    (
-        VkSampler sampler,
-        VkDescriptorImageInfo *imageInfos
-    )
+    void App::InitUniformBuffers()
+    {
+        for (int i = 0; i < uboBuffers.size(); i++)
+        {
+            uboBuffers[i] = std::make_unique<DskBuffer>
+            (
+                dskDevice,
+                sizeof(GlobalUbo),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+            );
+            uboBuffers[i]->map();
+        }
+    }
+
+    void App::DescriptorSets()
+    {
+        globalSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding
+            (
+                0,
+                VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                VK_SHADER_STAGE_VERTEX_BIT |
+                VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
+        for (int i = 0; i < globalDescriptorSets.size(); i++)
+        {
+            auto bufferInfo = uboBuffers[i]->descriptorInfo();
+            DskDescriptorWriter(*globalSetLayout, *globalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
+        }
+    }
+
+    void App::Textures()
+    {
+        // TODO: don't do textures for every gameObject
+
+        imageInfos = new VkDescriptorImageInfo[gameObjects.size()];
+
+        for (int i = 0; i < gameObjects.size(); i++)
+        {
+            imageInfos[i].sampler = nullptr;
+            imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfos[i].imageView = textures[i].imageView;
+        }
+
+        VkSamplerCreateInfo samplerInfo {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+
+        vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
+
+        VkDescriptorImageInfo samplerImageInfo {};
+        samplerImageInfo.sampler = sampler;
+        samplerImageInfo.imageView = nullptr;
+        samplerImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        textureSetLayout = DskDescriptorSetLayout::Builder(dskDevice)
+            .addBinding
+            (
+                0,
+                VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                gameObjects.size()
+            )
+            .addBinding
+            (
+                1,
+                VK_DESCRIPTOR_TYPE_SAMPLER,
+                VK_SHADER_STAGE_FRAGMENT_BIT
+            )
+            .build();
+
+        DskDescriptorWriter(*textureSetLayout, *globalPool)
+            .writeImage(0, imageInfos, gameObjects.size())
+            .writeImage(1, &samplerImageInfo, 1)
+            .build(textureDescriptorSet);
+    }
+
+    void App::RenderSystem()
+    {
+        dskRenderSystem.init
+        (
+            &dskDevice,
+            dskRenderer.getSwapChainRenderPass(),
+            globalSetLayout->getDescriptorSetLayout(),
+            textureSetLayout->getDescriptorSetLayout()
+        );
+    }
+
+    void App::InitCamera()
+    {
+        camera.setViewTarget
+        (
+            glm::vec3(-1.0f, -2.5f, 2.0f),
+            glm::vec3(0.0f, 0.0f, 2.5f)
+        );
+
+        viewerObject = DskGameObject::createGameObject()
+            .setTranslation({0.0f, -1.25f, -7.0f});
+    }
+
+    void App::UpdateCamera(float frameTime)
+    {
+        cameraController.moveInPlaneXZ
+        (
+            dskWindow.getGLFWwindow(),
+            frameTime,
+            viewerObject
+        );
+
+        camera.setViewYXZ
+        (
+            viewerObject.transform.translation,
+            viewerObject.transform.rotation
+        );
+
+        float aspect = dskRenderer.getAspectRatio();
+        camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+    }
+
+    void App::Billboards()
+    {
+        // improve and reimplement as a rendersystem?
+
+        for (int i = 0; i < gameObjects.size(); i++)
+        {
+            if
+            (
+                gameObjects[i].getId() == 6 ||
+                gameObjects[i].getId() == 7 ||
+                gameObjects[i].getId() == 8
+            )
+            {
+                gameObjects[i].setRotation
+                ({
+                    viewerObject.transform.rotation.x - glm::radians(90.0f),
+                    viewerObject.transform.rotation.y,
+                    0.0f
+                });
+                gameObjects[i].setScale
+                (
+                    glm::vec3(glm::distance(viewerObject.getTranslation(), gameObjects[i].getTranslation())) * 0.03f
+                );
+            }
+        }
+    }
+
+    void App::FrameInfo(float frameTime, VkCommandBuffer commandBuffer)
+    {
+        frameIndex = dskRenderer.getFrameIndex();
+        frameInfo.init
+        (
+            frameIndex,
+            frameTime,
+            commandBuffer,
+            camera,
+            globalDescriptorSets[frameIndex],
+            textureDescriptorSet
+        );
+    }
+
+    void App::UpdateUniformBuffers()
+    {
+        GlobalUbo ubo {};
+        ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
+        ubo.shaderBox = shaderBox;
+        ubo.time = glfwGetTime();
+        uboBuffers[frameIndex]->writeToBuffer(&ubo);
+        uboBuffers[frameIndex]->flush();
+    }
+
+    void App::Cleanup(VkSampler sampler, VkDescriptorImageInfo *imageInfos)
     {
         vkDeviceWaitIdle(dskDevice.device());
 

@@ -17,14 +17,15 @@ namespace dsk
         glm::mat4 normalMatrix;
     };
 
-    DskRenderSystem::DskRenderSystem
+    void DskRenderSystem::init
     (
-        DskDevice &device,
+        DskDevice *device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout,
         VkDescriptorSetLayout textureSetLayout
-    ): dskDevice{device}
+    )
     {
+        dskDevice = device;
         createPipelineLayout(globalSetLayout, textureSetLayout);
         createPipeline(renderPass);
     }
@@ -33,11 +34,12 @@ namespace dsk
     {
         vkDestroyPipelineLayout
         (
-            dskDevice.device(),
+            dskDevice->device(),
             pipelineLayout,
             nullptr
         );
     }
+
 
     void DskRenderSystem::createPipelineLayout
     (
@@ -63,7 +65,7 @@ namespace dsk
         (
             vkCreatePipelineLayout
             (
-                dskDevice.device(),
+                dskDevice->device(),
                 &pipelineLayoutInfo,
                 nullptr,
                 &pipelineLayout

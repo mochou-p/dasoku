@@ -16,17 +16,19 @@ namespace dsk
     class DskRenderSystem
     {
         public:
-            DskRenderSystem
-            (
-                DskDevice &device,
-                VkRenderPass renderPass,
-                VkDescriptorSetLayout globalSetLayout,
-                VkDescriptorSetLayout textureSetLayout
-            );
+            DskRenderSystem() {};
             ~DskRenderSystem();
 
             DskRenderSystem(const DskRenderSystem &) = delete;
             DskRenderSystem &operator=(const DskRenderSystem &) = delete;
+
+            void init
+            (
+                DskDevice *device,
+                VkRenderPass renderPass,
+                VkDescriptorSetLayout globalSetLayout,
+                VkDescriptorSetLayout textureSetLayout
+            );
 
             void renderGameObjects
             (
@@ -42,7 +44,7 @@ namespace dsk
             );
             void createPipeline(VkRenderPass renderPass);
 
-            DskDevice &dskDevice;
+            DskDevice *dskDevice = nullptr;
 
             std::unique_ptr<DskPipeline> dskPipeline;
             VkPipelineLayout pipelineLayout;

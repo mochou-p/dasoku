@@ -26,6 +26,11 @@ namespace dsk
         public:
             using id_t = unsigned int;
 
+            DskGameObject(id_t objId): id{objId} {}
+            DskGameObject() {}  // hereherehere
+
+            id_t id;
+
             static DskGameObject createGameObject()
             {
                 static id_t currentId = 0;
@@ -61,10 +66,5 @@ namespace dsk
             glm::vec3 color {};
             Transform3dComponent transform {};
             std::string tag;
-
-        private:
-            DskGameObject(id_t objId): id{objId} {}
-
-            id_t id;
     };
 }

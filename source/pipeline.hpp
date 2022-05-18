@@ -33,7 +33,7 @@ namespace dsk
         public:
             DskPipeline
             (
-                DskDevice &device,
+                DskDevice *device,
                 const std::string &vertFilepath,
                 const std::string &fragFilepath,
                 const PipelineConfigInfo &configInfo
@@ -65,7 +65,7 @@ namespace dsk
                 VkShaderModule *shaderModule
             );
 
-            DskDevice &dskDevice;
+            DskDevice *dskDevice = nullptr;
             VkPipeline graphicsPipeline;
             VkShaderModule vertShaderModule;
             VkShaderModule fragShaderModule;

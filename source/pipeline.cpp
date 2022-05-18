@@ -12,7 +12,7 @@ namespace dsk
 {
     DskPipeline::DskPipeline
     (
-        DskDevice &device,
+        DskDevice *device,
         const std::string &vertFilepath,
         const std::string &fragFilepath,
         const PipelineConfigInfo &configInfo
@@ -23,9 +23,9 @@ namespace dsk
 
     DskPipeline::~DskPipeline()
     {
-        vkDestroyShaderModule(dskDevice.device(), vertShaderModule, nullptr);
-        vkDestroyShaderModule(dskDevice.device(), fragShaderModule, nullptr);
-        vkDestroyPipeline(dskDevice.device(), graphicsPipeline, nullptr);
+        vkDestroyShaderModule(dskDevice->device(), vertShaderModule, nullptr);
+        vkDestroyShaderModule(dskDevice->device(), fragShaderModule, nullptr);
+        vkDestroyPipeline(dskDevice->device(), graphicsPipeline, nullptr);
     }
 
     std::vector<char> DskPipeline::readFile(const std::string &filepath)
@@ -116,7 +116,7 @@ namespace dsk
         (
             vkCreateGraphicsPipelines
             (
-                dskDevice.device(),
+                dskDevice->device(),
                 VK_NULL_HANDLE,
                 1,
                 &pipelineInfo,
@@ -144,7 +144,7 @@ namespace dsk
         (
             vkCreateShaderModule
             (
-                dskDevice.device(),
+                dskDevice->device(),
                 &createInfo, nullptr,
                 shaderModule
             ) != VK_SUCCESS
