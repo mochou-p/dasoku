@@ -82,6 +82,7 @@ namespace dsk
 
     VkResult DskBuffer::flush(VkDeviceSize size, VkDeviceSize offset)
     {
+        // simplify
         VkMappedMemoryRange mappedRange {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
         mappedRange.memory = memory;
@@ -93,6 +94,7 @@ namespace dsk
 
     VkResult DskBuffer::invalidate(VkDeviceSize size, VkDeviceSize offset)
     {
+        // simplify
         VkMappedMemoryRange mappedRange {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
         mappedRange.memory = memory;
@@ -117,7 +119,10 @@ namespace dsk
         writeToBuffer(data, instanceSize, index * alignmentSize);
     }
 
-    VkResult DskBuffer::flushIndex(int index) { return flush(alignmentSize, index * alignmentSize); }
+    VkResult DskBuffer::flushIndex(int index)
+    {
+        return flush(alignmentSize, index * alignmentSize);
+    }
 
     VkDescriptorBufferInfo DskBuffer::descriptorInfoForIndex(int index)
     {

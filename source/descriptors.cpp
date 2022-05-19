@@ -148,6 +148,7 @@ namespace dsk
         VkDescriptorSet &descriptor
     ) const
     {
+        // simplify
         VkDescriptorSetAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         allocInfo.descriptorPool = descriptorPool;
@@ -166,7 +167,7 @@ namespace dsk
             ) != VK_SUCCESS
         )
         {
-            std::cout << "HERE IT IS\n" <<vkAllocateDescriptorSets(dskDevice.device(),&allocInfo,&descriptor) << "HERE IT WAS\n";
+            std::cout << "HERE IT IS\n" << vkAllocateDescriptorSets(dskDevice.device(),&allocInfo,&descriptor) << "HERE IT WAS\n";
             return false;
         }
 
@@ -211,6 +212,7 @@ namespace dsk
             "binding single descriptor info, but binding expects multiple"
         );
 
+        // simplify
         VkWriteDescriptorSet write {};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;
@@ -239,6 +241,7 @@ namespace dsk
         //    "binding single descriptor info, but binding expects multiple"
         //);
 
+        // simplify
         VkWriteDescriptorSet write {};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         write.descriptorType = bindingDescription.descriptorType;

@@ -23,14 +23,14 @@ namespace dsk
         glm::vec4 ambientLightColor {0.8f, 0.95f, 1.0f, 0.03f};
         glm::vec4 lights[6] =
             {
-                { -0.50f, -0.75f, -0.50f,  0.00f }, // pos
-                {  0.30f,  0.30f,  1.00f,  1.00f }, // color
+                { -0.50f, -0.75f, -0.50f,  0.00f  },
+                {  0.30f,  0.30f,  1.00f,  1.00f  },
 
-                {  0.00f, -0.75f,  0.50f,  0.00f },
-                {  0.00f,  0.20f,  1.00f,  1.00f },
+                {  0.00f, -0.75f,  0.50f,  0.00f  },
+                {  0.00f,  0.20f,  1.00f,  1.00f  },
 
-                {  0.50f, -0.75f, -0.50f,  0.00f },
-                {  1.00f,  0.50f,  0.00f,  1.00f }
+                {  0.50f, -0.75f, -0.50f,  0.00f  },
+                {  1.00f,  0.50f,  0.00f,  1.00f  }
             };
         glm::vec4 shaderBox {0.0f};
         float time = 0;
@@ -40,13 +40,15 @@ namespace dsk
     {
         LoadGameObjects();
 
+        uint32_t count = DskSwapChain::MAX_FRAMES_IN_FLIGHT + gameObjects.size();
+
         globalPool =
             DskDescriptorPool::Builder(dskDevice)
-                .setMaxSets(DskSwapChain::MAX_FRAMES_IN_FLIGHT + gameObjects.size())
+                .setMaxSets(count)
                 .addPoolSize
                 (
                     VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    DskSwapChain::MAX_FRAMES_IN_FLIGHT + gameObjects.size()
+                    count
                 )
                 .addPoolSize
                 (
@@ -75,8 +77,8 @@ namespace dsk
             glfwPollEvents();
 
             auto newTime = std::chrono::high_resolution_clock::now();
-            float frameTime = std::chrono::duration
-                <float, std::chrono::seconds::period>(newTime - currentTime).count();
+            float frameTime =
+                std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
             currentTime = newTime;
 
             UpdateCamera(frameTime);
@@ -109,6 +111,10 @@ namespace dsk
         // TODO: dont create duplicate textures,
         //       set textureIndex to the texture
         //       thats already in textures[]
+
+        // keep using a dummy,
+        // or implement more
+        // shaders and pipelines?
 
         DskGameObject::createGameObject()
             .setTag("Floor")
@@ -158,7 +164,7 @@ namespace dsk
             .setRotation({0.0f, glm::radians(90.0f), 0.0f})
             .build(&gameObjects);
         
-        // temp solution
+        // temp hereherehere
         DskGameObject::createGameObject()
             .setTag("PointLightR")
             .setModel("quad.obj", dskDevice)
@@ -187,19 +193,20 @@ namespace dsk
     {
         VkDescriptorPoolSize pool_sizes[] =
             {
-                {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
-                {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
+                { VK_DESCRIPTOR_TYPE_SAMPLER,                1000 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000 }
             };
 
+        // simplify
         VkDescriptorPoolCreateInfo pool_info {};
         pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
@@ -216,6 +223,7 @@ namespace dsk
 
         ImGui_ImplGlfw_InitForVulkan(dskWindow.getGLFWwindow(), true);
 
+        // simplify
         ImGui_ImplVulkan_InitInfo init_info {};
         init_info.Instance = dskDevice.getInstance();
         init_info.PhysicalDevice = dskDevice.getPhysicalDevice();
@@ -279,7 +287,7 @@ namespace dsk
         );
             for (auto &obj : gameObjects)
             {
-                auto active = obj.getId() == activeObj;
+                bool active = obj.getId() == activeObj;
 
                 if (active)
                     ImGui::PushStyleColor(ImGuiCol_Button, {0.3f, 0.3f, 0.3f, 0.3f});
@@ -359,7 +367,7 @@ namespace dsk
             ImGuiWindowFlags_NoBackground |
             ImGuiWindowFlags_NoFocusOnAppearing
         );
-//            if (ImGui::Button("reload shader"))
+//            if (ImGui::Button("reload shader")) hereherehere
             ImVec2 pos  = ImGui::GetWindowPos();
             ImVec2 size = ImGui::GetWindowSize();
             shaderBox.x = pos.x;
@@ -383,13 +391,13 @@ namespace dsk
         for (int i = 0; i < uboBuffers.size(); i++)
         {
             uboBuffers[i] = std::make_unique<DskBuffer>
-            (
-                dskDevice,
-                sizeof(GlobalUbo),
-                1,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-            );
+                (
+                    dskDevice,
+                    sizeof(GlobalUbo),
+                    1,
+                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                );
             uboBuffers[i]->map();
         }
     }
@@ -427,6 +435,7 @@ namespace dsk
             imageInfos[i].imageView = textures[i].imageView;
         }
 
+        // simplify
         VkSamplerCreateInfo samplerInfo {};
         samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerInfo.magFilter = VK_FILTER_LINEAR;
@@ -440,6 +449,7 @@ namespace dsk
 
         vkCreateSampler(dskDevice.device(), &samplerInfo, nullptr, &sampler);
 
+        // simplify
         VkDescriptorImageInfo samplerImageInfo {};
         samplerImageInfo.sampler = sampler;
         samplerImageInfo.imageView = nullptr;
@@ -552,6 +562,7 @@ namespace dsk
 
     void App::UpdateUniformBuffers()
     {
+        // simplify
         GlobalUbo ubo {};
         ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
         ubo.shaderBox = shaderBox;

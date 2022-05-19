@@ -2,6 +2,8 @@
 
 #include "game_object.hpp"
 
+// maybe do this on gpu hereherehere
+
 namespace dsk
 {
     glm::mat4 DskGameObject::Transform3dComponent::mat4()

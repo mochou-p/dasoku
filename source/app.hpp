@@ -32,6 +32,11 @@ namespace dsk
             void run();
 
         private:
+            DskWindow dskWindow {WIDTH, HEIGHT, "Dasoku"};
+            DskDevice dskDevice {dskWindow};
+            DskRenderer dskRenderer {dskWindow, dskDevice};
+            DskRenderSystem dskRenderSystem;
+
             void LoadGameObjects();
 
             int activeObj = -1;
@@ -79,10 +84,6 @@ namespace dsk
 
             void Cleanup(VkSampler sampler, VkDescriptorImageInfo *imageInfos);
 
-            DskWindow dskWindow {WIDTH, HEIGHT, "Dasoku"};
-            DskDevice dskDevice {dskWindow};
-            DskRenderer dskRenderer {dskWindow, dskDevice};
-            DskRenderSystem dskRenderSystem;
 
             std::unique_ptr<DskDescriptorPool> globalPool {};
             std::vector<DskGameObject> gameObjects;

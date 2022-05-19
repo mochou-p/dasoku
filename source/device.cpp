@@ -53,7 +53,7 @@ namespace dsk
         const VkAllocationCallbacks *pAllocator
     )
     {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr
         (
             instance,
             "vkDestroyDebugUtilsMessengerEXT"
@@ -93,6 +93,7 @@ namespace dsk
             throw std::runtime_error("validation layers requested, but not available");
         }
 
+        // simplify
         VkApplicationInfo appInfo {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "dskEngine App";
@@ -101,6 +102,7 @@ namespace dsk
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_0;
 
+        // simplify
         VkInstanceCreateInfo createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
@@ -176,6 +178,7 @@ namespace dsk
 
         for (uint32_t queueFamily : uniqueQueueFamilies)
         {
+            // simplify
             VkDeviceQueueCreateInfo queueCreateInfo {};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = queueFamily;
@@ -184,15 +187,15 @@ namespace dsk
             queueCreateInfos.push_back(queueCreateInfo);
         }
 
+        // simplify
         VkPhysicalDeviceFeatures deviceFeatures {};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+        // simplify
         VkDeviceCreateInfo createInfo {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-
         createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
-
         createInfo.pEnabledFeatures = &deviceFeatures;
         createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
         createInfo.ppEnabledExtensionNames = deviceExtensions.data();
@@ -222,11 +225,12 @@ namespace dsk
     {
         QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
+        // simplify
         VkCommandPoolCreateInfo poolInfo {};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
         poolInfo.flags =
-        VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+            VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
         if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
         {
@@ -248,7 +252,7 @@ namespace dsk
         {
             SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
             swapChainAdequate =
-            !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+                !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
         }
 
         VkPhysicalDeviceFeatures supportedFeatures;
@@ -263,6 +267,7 @@ namespace dsk
         VkDebugUtilsMessengerCreateInfoEXT &createInfo
     )
     {
+        // simplify
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -308,6 +313,7 @@ namespace dsk
                 }
             }
 
+            // uummmm
             if (!layerFound) { return false; }
         }
 
@@ -516,6 +522,7 @@ namespace dsk
         VkDeviceMemory &bufferMemory
     )
     {
+        // simplify
         VkBufferCreateInfo bufferInfo {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
@@ -530,6 +537,7 @@ namespace dsk
         VkMemoryRequirements memRequirements;
         vkGetBufferMemoryRequirements(device_, buffer, &memRequirements);
 
+        // simplify
         VkMemoryAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
@@ -545,6 +553,7 @@ namespace dsk
 
     VkCommandBuffer DskDevice::beginSingleTimeCommands()
     {
+        // simplify
         VkCommandBufferAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -554,6 +563,7 @@ namespace dsk
         VkCommandBuffer commandBuffer;
         vkAllocateCommandBuffers(device_, &allocInfo, &commandBuffer);
 
+        // simplify
         VkCommandBufferBeginInfo beginInfo {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -567,6 +577,7 @@ namespace dsk
     {
         vkEndCommandBuffer(commandBuffer);
 
+        // simplify
         VkSubmitInfo submitInfo {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
@@ -582,6 +593,7 @@ namespace dsk
     {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
+        // simplify
         VkBufferCopy copyRegion {};
         copyRegion.srcOffset = 0;  // optional
         copyRegion.dstOffset = 0;  // optional
@@ -602,19 +614,19 @@ namespace dsk
     {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
+        // simplify
         VkBufferImageCopy region {};
         region.bufferOffset = 0;
         region.bufferRowLength = 0;
         region.bufferImageHeight = 0;
-
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel = 0;
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = layerCount;
-
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {width, height, 1};
 
+        // simplify
         VkImageMemoryBarrier toTransfer {};
         toTransfer.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         toTransfer.srcAccessMask = 0;
@@ -642,6 +654,7 @@ namespace dsk
             &toTransfer
         );
 
+        // simplify
         VkBufferImageCopy copyRegion {};
         copyRegion.imageExtent = region.imageExtent;
         copyRegion.imageSubresource.aspectMask = region.imageSubresource.aspectMask;
@@ -659,6 +672,7 @@ namespace dsk
             &copyRegion
         );
 
+        // simplify
         VkImageMemoryBarrier toReadable = toTransfer;
         toReadable.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         toReadable.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -698,6 +712,7 @@ namespace dsk
         VkMemoryRequirements memRequirements;
         vkGetImageMemoryRequirements(device_, image, &memRequirements);
 
+        // simplify
         VkMemoryAllocateInfo allocInfo {};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;

@@ -24,6 +24,7 @@ namespace dsk
         stagingBuffer.map();
         stagingBuffer.writeToBuffer(pixels);
 
+        // simplify
         VkImageCreateInfo imageInfo {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -66,6 +67,7 @@ namespace dsk
 
         stbi_image_free(pixels);
 
+        // simplify
         VkImageViewCreateInfo imageViewInfo {};
         imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         imageViewInfo.pNext = nullptr;

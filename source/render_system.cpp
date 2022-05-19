@@ -47,6 +47,7 @@ namespace dsk
         VkDescriptorSetLayout textureSetLayout
     )
     {
+        // simplify
         VkPushConstantRange pushConstantRange {};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
@@ -54,6 +55,7 @@ namespace dsk
 
         std::vector<VkDescriptorSetLayout> descriptorSetLayout {globalSetLayout, textureSetLayout};
 
+        // simplify
         VkPipelineLayoutCreateInfo pipelineLayoutInfo {};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayout.size());
@@ -78,6 +80,7 @@ namespace dsk
 
     void DskRenderSystem::createPipeline(VkRenderPass renderPass)
     {
+        // simplify ?
         PipelineConfigInfo pipelineConfig {};
         DskPipeline::defaultPipelineConfigInfo(pipelineConfig);
 
@@ -114,6 +117,7 @@ namespace dsk
 
         for (auto &obj : gameObjects)
         {
+            // simplify
             DskPushConstantData push {};
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();

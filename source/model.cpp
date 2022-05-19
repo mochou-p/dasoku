@@ -55,6 +55,7 @@ namespace dsk
         const std::string &filepath
     )
     {
+        // hereherehere
         Data data {};
         data.loadModel(filepath);
 
@@ -119,14 +120,14 @@ namespace dsk
         stagingBuffer.writeToBuffer((void *)indices.data());
 
         indexBuffer = std::make_unique<DskBuffer>
-        (
-            dskDevice,
-            indexSize,
-            indexCount,
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-        );
+            (
+                dskDevice,
+                indexSize,
+                indexCount,
+                VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+                VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+            );
         
         dskDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
     }
@@ -157,9 +158,11 @@ namespace dsk
 
     std::vector<VkVertexInputBindingDescription> DskModel::Vertex::getBindingDescriptions()
     {
-        return {
-            // BINDING, STRIDE, INPUTRATE
-            {0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX}
+        return
+        {
+            // hereherehere
+            // BINDING, STRIDE,         INPUT RATE
+            {  0,       sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX  }
         };
     }
 
@@ -167,11 +170,11 @@ namespace dsk
     {
         return
         {
-            // LOCATION, BINDING, FORMAT, OFFSET
-            {0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)},
-            {1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)   },
-            {2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)  },
-            {3, 0, VK_FORMAT_R32G32_SFLOAT,    offsetof(Vertex, uv)      }
+            // LOCATION, BINDING, FORMAT,                     OFFSET
+            {  0,        0,       VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)  },
+            {  1,        0,       VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color)     },
+            {  2,        0,       VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal)    },
+            {  3,        0,       VK_FORMAT_R32G32_SFLOAT,    offsetof(Vertex, uv)        }
         };
     }
 
