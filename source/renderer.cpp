@@ -178,7 +178,7 @@ namespace dsk
 
         // simplify
         std::array<VkClearValue, 2> clearValues {};
-        clearValues[0].color = {0.0075f, 0.0075f, 0.0075f}; // background
+        clearValues[0].color = {0.003f, 0.003f, 0.003f};  // background
         clearValues[1].depthStencil = {1.0f, 0};
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();

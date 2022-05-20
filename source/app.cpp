@@ -24,16 +24,16 @@ namespace dsk
         glm::vec4 lights[6] =
             {
                 { -0.50f, -0.75f, -0.50f,  0.00f  },
-                {  0.30f,  0.30f,  1.00f,  1.00f  },
+                {  1.00f,  0.00f,  0.00f,  1.00f  },
 
                 {  0.00f, -0.75f,  0.50f,  0.00f  },
-                {  0.00f,  0.20f,  1.00f,  1.00f  },
+                {  0.00f,  1.00f,  0.00f,  1.00f  },
 
                 {  0.50f, -0.75f, -0.50f,  0.00f  },
-                {  1.00f,  0.50f,  0.00f,  1.00f  }
+                {  0.00f,  0.00f,  1.00f,  1.00f  }
             };
-        glm::vec4 shaderBox {0.0f};
         float time = 0;
+        int renderFlags = 0;
     };
 
     App::App()
@@ -60,7 +60,7 @@ namespace dsk
 
     App::~App() {}
 
-    void App::run()
+    void App::Run()
     {
         InitUniformBuffers();
         DescriptorSets();
@@ -140,26 +140,12 @@ namespace dsk
             .setScale({1.0f, 1.0f, 3.0f})
             .setRotation({glm::radians(180.0f), 0.0f, glm::radians(90.0f)})
             .build(&gameObjects);
-
-        DskGameObject::createGameObject()
-            .setTag("FlatVase")
-            .setModel("flat_vase.obj", dskDevice)
-            .setTexture("_white.png", textures, dskDevice)
-            .setTranslation({0.3f, 0.0f, 0.0f})
-            .build(&gameObjects);
-        
-        DskGameObject::createGameObject()
-            .setTag("SmoothVase")
-            .setModel("smooth_vase.obj", dskDevice)
-            .setTexture("_white.png", textures, dskDevice)
-            .setTranslation({-0.3f, 0.0f, 0.0f})
-            .build(&gameObjects);
         
         DskGameObject::createGameObject()
             .setTag("Catgirl")
             .setModel("neco_arc.obj", dskDevice)
             .setTexture("BaseColor.png", textures, dskDevice)
-            .setTranslation({0.0f, 0.0f, 2.5f})
+            .setTranslation({0.0f, 0.0f, 0.25f})
             .setScale({0.3f, -0.3f, 0.3f})
             .setRotation({0.0f, glm::radians(90.0f), 0.0f})
             .build(&gameObjects);
@@ -186,7 +172,7 @@ namespace dsk
             .setTranslation({0.5f, -0.75f, -0.5f})
             .build(&gameObjects);
 
-        // 9
+        // 7
     }
 
     void App::InitImGui()
@@ -260,11 +246,12 @@ namespace dsk
         ImGui::PushStyleColor(ImGuiCol_TabActive,     {0.0f, 0.0f, 0.0f, 1.0f});
 
         ImGuiWindowFlags windowFlags =
-            ImGuiWindowFlags_NoCollapse |
+            ImGuiWindowFlags_NoCollapse/* |
             ImGuiWindowFlags_NoResize   |
             ImGuiWindowFlags_NoMove     |
-            ImGuiWindowFlags_NoFocusOnAppearing;
+            ImGuiWindowFlags_NoFocusOnAppearing*/;
 
+        ///////////////////////////////////////////////////////////////////////////////
         ImGui::Begin
         (
             "Frametime",
@@ -279,9 +266,24 @@ namespace dsk
             );
         ImGui::End();
 
+        ///////////////////////////////////////////////////////////////////////////////
         ImGui::Begin
         (
-            "Hierarchy",
+            "Render flags",
+            nullptr,
+            windowFlags
+        );
+            renderFlags = 0;
+            ImGui::Checkbox("Lighting", &rfLight);
+            ImGui::Checkbox("Texture",  &rfTex);
+            renderFlags += rfLight ? 1 : 0;
+            renderFlags += rfTex   ? 2 : 0;
+        ImGui::End();
+
+        ///////////////////////////////////////////////////////////////////////////////
+        ImGui::Begin
+        (
+            "Scene",
             nullptr,
             windowFlags
         );
@@ -322,16 +324,15 @@ namespace dsk
             rotation->y = glm::degrees(rotation->y);
             rotation->z = glm::degrees(rotation->z);
 
+            ///////////////////////////////////////////////////////////////////////////
             ImGui::Begin
             (
-                "Inspector",
+                "Transform",
                 nullptr,
                 windowFlags
             );
                 ImGui::Text("tag: %s", obj->getTag().c_str());
                 ImGui::Dummy(ImVec2(0.0f, 20.0f));
-                ImGui::Text("transform:");
-                ImGui::Dummy(ImVec2(0.0f, 10.0f));
                 ImGui::Text("translation");
                 ImGui::InputFloat("x", &translation->x, 0.01f, 0.05f, "%.4f");
                 ImGui::InputFloat("y", &translation->y, 0.01f, 0.05f, "%.4f");
@@ -360,21 +361,6 @@ namespace dsk
             rotation->z = glm::radians(rotation->z);
         }
 
-        ImGui::Begin
-        (
-            "shaderbox",
-            nullptr,
-            ImGuiWindowFlags_NoBackground |
-            ImGuiWindowFlags_NoFocusOnAppearing
-        );
-//            if (ImGui::Button("reload shader")) hereherehere
-            ImVec2 pos  = ImGui::GetWindowPos();
-            ImVec2 size = ImGui::GetWindowSize();
-            shaderBox.x = pos.x;
-            shaderBox.y = pos.y;
-            shaderBox.z = pos.x + size.x;
-            shaderBox.w = pos.y + size.y;
-        ImGui::End();
 
         ImGui::PopStyleColor(6);
 
@@ -527,9 +513,9 @@ namespace dsk
         {
             if
             (
-                gameObjects[i].getId() == 6 ||
-                gameObjects[i].getId() == 7 ||
-                gameObjects[i].getId() == 8
+                gameObjects[i].getId() == 4 ||
+                gameObjects[i].getId() == 5 ||
+                gameObjects[i].getId() == 6
             )
             {
                 gameObjects[i].setRotation
@@ -562,11 +548,10 @@ namespace dsk
 
     void App::UpdateUniformBuffers()
     {
-        // simplify
         GlobalUbo ubo {};
         ubo.projectionViewMatrix = camera.getProjection() * camera.getView();
-        ubo.shaderBox = shaderBox;
         ubo.time = glfwGetTime();
+        ubo.renderFlags = renderFlags;
         uboBuffers[frameIndex]->writeToBuffer(&ubo);
         uboBuffers[frameIndex]->flush();
     }

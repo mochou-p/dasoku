@@ -20,7 +20,7 @@ namespace dsk
     class App
     {
         public:
-            static constexpr int WIDTH = 800;
+            static constexpr int WIDTH  = 800;
             static constexpr int HEIGHT = 600;
 
             App();
@@ -29,7 +29,7 @@ namespace dsk
             App(const App &) = delete;
             App &operator=(const App &) = delete;
 
-            void run();
+            void Run();
 
         private:
             DskWindow dskWindow {WIDTH, HEIGHT, "Dasoku"};
@@ -37,14 +37,20 @@ namespace dsk
             DskRenderer dskRenderer {dskWindow, dskDevice};
             DskRenderSystem dskRenderSystem;
 
+            std::unique_ptr<DskDescriptorPool> globalPool {};
+            std::vector<DskGameObject> gameObjects;
+
             void LoadGameObjects();
 
-            int activeObj = -1;
+            int activeObj     = -1;
             int lastActiveObj = -1;
 
             VkDescriptorPool imguiPool;
             void InitImGui();
 
+            int renderFlags = 0;
+            bool rfLight = true;
+            bool rfTex   = true;
             void SetupImGui();
 
             void RenderImGui(VkCommandBuffer commandBuffer);
@@ -59,7 +65,7 @@ namespace dsk
             void DescriptorSets();
 
             VkDescriptorImageInfo *imageInfos;
-            DskTexture textures[32];
+            DskTexture textures[32];  // hereherehere
             VkSampler sampler;
             std::unique_ptr<dsk::DskDescriptorSetLayout> textureSetLayout;
             VkDescriptorSet textureDescriptorSet;
@@ -83,11 +89,5 @@ namespace dsk
             void UpdateUniformBuffers();
 
             void Cleanup(VkSampler sampler, VkDescriptorImageInfo *imageInfos);
-
-
-            std::unique_ptr<DskDescriptorPool> globalPool {};
-            std::vector<DskGameObject> gameObjects;
-
-            glm::vec4 shaderBox;
     };
 }
